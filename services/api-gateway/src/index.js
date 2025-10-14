@@ -18,6 +18,14 @@ app.use('/api/auth', createProxyMiddleware({
   },
 }));
 
+app.use('/api/garage', createProxyMiddleware({
+  target: process.env.GARAGE_SERVICE_URL,
+  changeOrigin: true,
+  pathRewrite: {
+    '^/api/garage': '', // remove the prefix
+  },
+}));
+
 // Add other services here later, for example:
 // app.use('/api/garages', createProxyMiddleware({ target: process.env.GARAGE_SERVICE_URL, ... }));
 

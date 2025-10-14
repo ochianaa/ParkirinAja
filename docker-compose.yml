@@ -28,6 +28,20 @@ services:
       - PORT=3001
     expose:
       - "3001"
+    
+  garage-service:
+    build: ./services/garage-service
+    container_name: garage-service
+    restart: unless-stopped
+    depends_on:
+      - postgres-db
+    volumes:
+      - ./services/garage-service:/app
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres-db:5432/${POSTGRES_DB}
+      - PORT=3002
+    expose:
+      - "3002"
 
   # Service for our API Gateway
   api-gateway:
@@ -41,6 +55,7 @@ services:
     environment:
       - PORT=8080
       - AUTH_SERVICE_URL=http://auth-service:3001
+      - GARAGE_SERVICE_URL=http://garage-service:3002
 
 volumes:
   postgres_data:
