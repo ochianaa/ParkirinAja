@@ -22,9 +22,9 @@ services:
     depends_on:
       - postgres-db
     volumes:
-      - ./services/auth-service/src:/app/src
+      - ./services/auth-service:/app
     environment:
-      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres-db:${POSTGRES_PORT}/${POSTGRES_DB}
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres-db:5432/${POSTGRES_DB}
       - PORT=3001
     expose:
       - "3001"
