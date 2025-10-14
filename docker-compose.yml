@@ -45,6 +45,26 @@ services:
     expose:
       - "3002"
 
+  booking-service:
+    build: ./services/booking-service
+    container_name: booking-service
+    restart: unless-stopped
+    depends_on:
+      - postgres-db
+      - garage-service
+      - auth-service
+    volumes:
+      - ./services/booking-service:/app
+      - /app/node_modules
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres-db:5432/${POSTGRES_DB}
+      - PORT=3003
+      - GARAGE_SERVICE_URL=http://garage-service:3002
+      - AUTH_SERVICE_URL=http://auth-service:3001
+    expose:
+      - "3003"
+    
+
   # Service for our API Gateway
   api-gateway:
     build: ./services/api-gateway
