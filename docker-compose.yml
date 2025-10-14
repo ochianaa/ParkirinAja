@@ -23,6 +23,7 @@ services:
       - postgres-db
     volumes:
       - ./services/auth-service:/app
+      - /app/node_modules
     environment:
       - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres-db:5432/${POSTGRES_DB}
       - PORT=3001
@@ -37,6 +38,7 @@ services:
       - postgres-db
     volumes:
       - ./services/garage-service:/app
+      - /app/node_modules
     environment:
       - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres-db:5432/${POSTGRES_DB}
       - PORT=3002
