@@ -1,0 +1,83 @@
+
+services:
+  # Service for our PostgreSQL Database
+  postgres-db:
+    image: postgres:17-alpine
+    container_name: parkirinaja-postgres-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "${POSTGRES_PORT}:5432"
+
+  # Service for our Authentication Service
+  auth-service:
+    build: ./services/auth-service
+    container_name: auth-service
+    restart: unless-stopped
+    depends_on:
+      - postgres-db
+    volumes:
+      - ./services/auth-service:/app
+      - /app/node_modules
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres-db:5432/${POSTGRES_DB}
+      - PORT=3001
+    expose:
+      - "3001"
+    
+  garage-service:
+    build: ./services/garage-service
+    container_name: garage-service
+    restart: unless-stopped
+    depends_on:
+      - postgres-db
+    volumes:
+      - ./services/garage-service:/app
+      - /app/node_modules
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres-db:5432/${POSTGRES_DB}
+      - PORT=3002
+    expose:
+      - "3002"
+
+  booking-service:
+    build: ./services/booking-service
+    container_name: booking-service
+    restart: unless-stopped
+    depends_on:
+      - postgres-db
+      - garage-service
+      - auth-service
+    volumes:
+      - ./services/booking-service:/app
+      - /app/node_modules
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres-db:5432/${POSTGRES_DB}
+      - PORT=3003
+      - GARAGE_SERVICE_URL=http://garage-service:3002
+      - AUTH_SERVICE_URL=http://auth-service:3001
+    expose:
+      - "3003"
+    
+
+  # Service for our API Gateway
+  api-gateway:
+    build: ./services/api-gateway
+    container_name: api-gateway
+    restart: unless-stopped
+    depends_on:
+      - auth-service
+    ports:
+      - "8080:8080" 
+    environment:
+      - PORT=8080
+      - AUTH_SERVICE_URL=http://auth-service:3001
+      - GARAGE_SERVICE_URL=http://garage-service:3002
+
+volumes:
+  postgres_data:
