@@ -1,11 +1,22 @@
 # Makefile for ParkirinAja Backend
 
+MIGRATION_SERVICES := auth-service garage-service booking-service
+
 # This command will be run if you just type `make`
 .DEFAULT_GOAL := help
 
 ## --------------------------------------
 ## Database Migration Commands
 ## --------------------------------------
+
+# Usage: make migrate-all
+migrate-all:
+	@echo "🚀 Running migrations for ALL services..."
+	@for service in $(MIGRATION_SERVICES); do \
+		echo "--- Migrating $$service ---"; \
+		$(MAKE) migrate SERVICE=$$service; \
+	done
+	@echo "✅ All migrations complete."
 
 # Usage: make migrate SERVICE=auth-service
 migrate:

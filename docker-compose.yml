@@ -72,6 +72,9 @@ services:
     restart: unless-stopped
     depends_on:
       - auth-service
+    volumes:
+      - ./services/api-gateway:/app
+      - /app/node_modules
     ports:
       - "8080:8080" 
     environment:
