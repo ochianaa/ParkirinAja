@@ -1,6 +1,6 @@
 const FindGarages = () => {
     return(
-        <section className="bg-gradient-to-t from-slate-900 to-blue-950 text-white mx-auto px-20 py-20">
+        <section id='findGarages' className="bg-gradient-to-t from-slate-900 to-blue-950 text-white mx-auto px-20 py-20">
             <div className="flex flex-col items-center gap-10">
                 <div>
                     <h1 className="font-bold text-4xl mb-5">Ready to Find Your Perfect Garage?</h1>

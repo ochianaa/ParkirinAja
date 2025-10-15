@@ -3,7 +3,7 @@ import { TypeAnimation } from 'react-type-animation';
 
 const Home = () => {
     return (
-        <section className="bg-gradient-to-b from-slate-900 to-blue-950 text-white">
+        <section id='home' className="bg-gradient-to-b from-slate-900 to-blue-950 text-white">
             <div className="container mx-auto px-34 py-24 text-center">
                 <TypeAnimation
                     sequence={[

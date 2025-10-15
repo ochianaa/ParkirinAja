@@ -1,5 +1,7 @@
-const Card = ({ garage }) => {
-    const { name, image, address, price_per_hour, status } = garage;
+import { FaHeart, FaRegHeart } from 'react-icons/fa'
+
+const Card = ({ garage, isFavorited, onToggleFavorite }) => {
+    const { garage_id, name, image, address, price_per_hour, status } = garage;
 
     return(
         <div className="bg-white rounded-xl shadow-lg overflow-hidden w-full max-w-90 hover:scale-110 transition-transform duration-300">
@@ -8,6 +10,16 @@ const Card = ({ garage }) => {
                 <div className={`absolute top-3 left-3 text-white text-xs font-bold px-2 py-1 rounded ${status === 'available' ? 'bg-green-500' : 'bg-red-500'}`}>
                 {status}
                 </div>
+                <button 
+                    onClick={() => onToggleFavorite(garage_id)}
+                    className="absolute top-3 right-3 bg-white p-2 rounded-full cursor-pointer hover:bg-red-100 transition-colors"
+                    >
+                        {isFavorited ? (
+                            <FaHeart className="w-4 h-4 text-red-500" />
+                        ) : (
+                            <FaRegHeart className="w-4 h-4 text-gray-600" />
+                        )}
+                </button>
             </div>
 
             <div className="p-4">
