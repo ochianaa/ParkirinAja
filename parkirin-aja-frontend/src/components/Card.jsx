@@ -2,7 +2,7 @@ const Card = ({ garage }) => {
     const { name, image, address, price_per_hour, status } = garage;
 
     return(
-        <div className="bg-white rounded-xl shadow-lg overflow-hidden w-full max-w-80 hover:scale-110 transition-transform duration-300">
+        <div className="bg-white rounded-xl shadow-lg overflow-hidden w-full max-w-90 hover:scale-110 transition-transform duration-300">
             <div className="relative">
                 <img className="w-full h-40 object-cover" src={image} alt={name} />
                 <div className={`absolute top-3 left-3 text-white text-xs font-bold px-2 py-1 rounded ${status === 'available' ? 'bg-green-500' : 'bg-red-500'}`}>

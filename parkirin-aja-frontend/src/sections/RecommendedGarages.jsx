@@ -1,4 +1,5 @@
 import Card from "../components/card";
+import { Fade } from "react-awesome-reveal"
 
 const garagesData = [
   {
@@ -33,6 +34,7 @@ const garagesData = [
 
 const RecommendedGarages = () => {
     return (
+      <Fade direction="fade" duration={1000} triggerOnce fraction={0.3}>
         <section className="bg-gradient-to-b from-slate-200 to-white text-gray-800">
             <div className="mx-auto px-20 py-24 text-center border-l border-r border-gray-300">
                 <h1 className="text-5xl font-bold mb-6">Recomended Garages</h1>
@@ -45,6 +47,7 @@ const RecommendedGarages = () => {
                 </div>
             </div>
         </section>
+      </Fade>
     )
 }
 

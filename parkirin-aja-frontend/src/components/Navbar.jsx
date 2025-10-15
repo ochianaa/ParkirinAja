@@ -3,7 +3,7 @@ import logo from '../assets/LogoBiruGold.png'
 const Navbar = () => {
     return (
         <header className='bg-white shadow-sm'>
-            <nav className='container mx-auto px-6 py-4 flex justify-between items-center'>
+            <nav className='container mx-auto px-26 py-4 flex justify-between items-center'>
                 <div>
                     <img src={logo} alt="Parkirin Aja" className='h-12 w-auto' />
                 </div>
