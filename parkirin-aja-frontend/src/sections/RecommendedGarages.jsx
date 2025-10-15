@@ -1,4 +1,4 @@
-import Card from "./card";
+import Card from "../components/card";
 
 const garagesData = [
   {
@@ -33,7 +33,7 @@ const garagesData = [
 
 const RecommendedGarages = () => {
     return (
-        <section className="bg-white text-gray-800">
+        <section className="bg-gradient-to-b from-slate-200 to-white text-gray-800">
             <div className="mx-auto px-20 py-24 text-center border-l border-r border-gray-300">
                 <h1 className="text-5xl font-bold mb-6">Recomended Garages</h1>
                 <p className="text-xl text-gray-800 mb-15">Discover top-rated garage spaces in popular locations</p>

@@ -2,7 +2,7 @@ import { FaSearch, FaCalendarCheck, FaCar } from 'react-icons/fa';
 
 const HowItWorks = () => {
     return(
-        <section className='bg-gradient-to-t from-slate-100 to-white text-gray-800'>
+        <section className='bg-gradient-to-t from-slate-200 to-white text-gray-800'>
             <div className='mx-auto px-20 py-20 text-center border-l border-r border-gray-300'>
                 <h1 className='text-5xl font-bold mb-6 text-slate-800'>How It Works</h1>
                 <p className='text-xl text-gray-800 mb-15'>Simple steps to secure your parking space</p>
