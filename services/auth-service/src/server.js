@@ -1,5 +1,3 @@
-// services/auth-service/src/server.js
-
 const express = require('express');
 const cors = require('cors'); // Use the cors library
 require('dotenv').config();
