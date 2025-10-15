@@ -8,7 +8,7 @@ const Contact = () => {
                 <div className="mx-auto w-full px-10 py-10 text-center flex flex-row border-b-1 border-b-gray-300">
                     <div className='w-full flex flex-col justify-start text-start gap-4'>
                         <div>
-                            <img src={logo} alt="Parkirin Aja" className='h-16 w-auto' />
+                            <img src={logo} alt="Parkirin Aja" className='h-14 w-auto' />
                         </div>
                         <p className='text-lg'>Find and book secure garage spaces in your area with ease.</p>
                     </div>
