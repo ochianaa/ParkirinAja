@@ -1,6 +1,17 @@
 
 services:
   # Service for our PostgreSQL Database
+  frontend-service:
+    build:
+      context: ./parkirin-aja-frontend
+      dockerfile: Dockerfile
+    container_name: parkirinaja-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      - api-gateway
+
   postgres-db:
     image: postgres:17-alpine
     container_name: parkirinaja-postgres-db
