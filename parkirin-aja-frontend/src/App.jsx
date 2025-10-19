@@ -4,6 +4,14 @@ import './App.css'
 import FavoritesPage from './pages/FavoritePage'
 import HomePage from './pages/HomePage'
 import { Routes, Route } from 'react-router-dom'
+import SearchResultsPage from './pages/SearchResultSPage'
+import LoginPage from './pages/LoginPage'
+import RegisterPage from './pages/RegisterPage'
+import ProfilePage from './pages/ProfilePage'
+import MyBookingPage from './pages/MyBookingPage'
+import BookingDetailPage from './pages/BookingDetailPage'
+import OwnerDashboard from './pages/OwnerDashboard'
+import MyGaragesOwnerPage from './pages/MyGaragesOwnerPage'
 
 const garagesData = [
   {
@@ -35,6 +43,24 @@ const garagesData = [
   },
 ];
 
+const dummyBookings = [
+    { id: 1, garageName: 'Garasi Aman Downtown', date: '20 Oct 2025', total: 500000, status: 'completed' },
+    { id: 2, garageName: 'Parkir Ekspres Kuta', date: '25 Oct 2025', total: 1000000, status: 'pending' },
+    { id: 3, garageName: 'Garasi Murah Meriah', date: '15 Sep 2025', total: 800000, status: 'cancelled' },
+];
+
+  const dummyBookingDetails = {
+      id: 2,
+      garage: {
+          name: 'Parkir Ekspres Kuta',
+          address: 'Jl. Pantai Kuta No. 8, Kuta, Bali',
+          image: 'https://i.pinimg.com/736x/ba/52/95/ba52956eeeb1db46940bcf15495f1a7d.jpg',
+      },
+      startTime: '25 Oct 2025, 14:00',
+      endTime: '26 Oct 2025, 14:00',
+      totalPrice: 1000000,
+      status: 'pending',
+  };
 
 function App() {
 
@@ -70,6 +96,56 @@ function App() {
               favorites={favorites}
               onToggleFavorite={handleToggleFavorite}
             />
+          } 
+        />
+        <Route path="/search" 
+          element={
+              <SearchResultsPage
+                garagesData={garagesData}
+                favorites={favorites} 
+                onToggleFavorite={handleToggleFavorite} 
+              />
+          } 
+        />
+        <Route path="/login" 
+          element={
+              <LoginPage/>
+          } 
+        />
+        <Route path="/register" 
+          element={
+              <RegisterPage/>
+          } 
+        />
+        <Route path="/profile" 
+          element={
+              <ProfilePage/>
+          } 
+        />
+        <Route path="/bookings"
+          element={
+              <MyBookingPage
+                dummyBookings={dummyBookings}
+              />
+          } 
+        />
+        <Route path="/bookingdetails"
+          element={
+              <BookingDetailPage
+                dummyBookingDetails={dummyBookingDetails}
+              />
+          } 
+        />
+        <Route path="/ownerdashboard"
+          element={
+              <OwnerDashboard/>
+          } 
+        />
+        <Route path="/mygaragesowner"
+          element={
+              <MyGaragesOwnerPage
+                garagesData={garagesData}
+              />
           } 
         />
       </Routes>
