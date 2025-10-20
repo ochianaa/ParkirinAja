@@ -9,7 +9,13 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      // define association here
+      // Many-to-many relationship with Roles through UserRoles
+      User.belongsToMany(models.Role, {
+        through: 'UserRoles',
+        foreignKey: 'userId',
+        otherKey: 'roleId',
+        as: 'roles'
+      });
     }
 
     // Instance method to get user without password

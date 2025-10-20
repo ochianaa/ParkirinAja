@@ -9,7 +9,20 @@ MIGRATION_SERVICES := auth-service garage-service booking-service
 ## Database Migration Commands
 ## --------------------------------------
 
-# Usage: make migrate-all
+# pakai kalau tidak ada perubahan codingan di service
+up:
+	@docker-compose up
+
+# pakai kalau ada perubahan codingan di service
+up build:
+	@docker-compose up --build
+
+# pakai kalau ada perubahan dependency di package.json
+rebuild:
+	@docker-compose build --no-cache
+	@docker-compose up
+
+# Usage: make migrate-all - pakai kalau ada perubahan pada migrasi database di semua service
 migrate-all:
 	@echo "🚀 Running migrations for ALL services..."
 	@for service in $(MIGRATION_SERVICES); do \
@@ -38,6 +51,11 @@ seed:
 	@echo "🌱 Seeding database for $(SERVICE)..."
 	@docker-compose exec $(SERVICE) npx sequelize-cli db:seed:all
 
+# Usage: make admin-seed - Seeds admin user to auth-service database
+admin-seed:
+	@echo "👑 Seeding admin user to auth-service database..."
+	@docker-compose exec auth-service npx sequelize-cli db:seed --seed 20251013205000-create-admin-user.js
+
 ## --------------------------------------
 ## Help Command
 ## --------------------------------------
@@ -47,3 +65,4 @@ help:
 	@echo "  make migrate-undo SERVICE=<name>    - Undoes the last migration for a service."
 	@echo "  make new-migration SERVICE=<name> NAME=<name> - Creates a new migration file."
 	@echo "  make seed SERVICE=<name>            - Runs all seeders for a service."
+	@echo "  make admin-seed                     - Seeds admin user to auth-service database."
