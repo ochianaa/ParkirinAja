@@ -15,7 +15,7 @@ const Home = () => {
                     className="text-5xl font-bold mb-6"
                     repeat={Infinity}
                 />
-                <p className="text-xl text-slate-300">Discover secure, affordable garage spaces in your area. <br/> Book instantly and park with confidence.</p>
+                <p className="text-xl text-slate-300 mb-20">Discover secure, affordable garage spaces in your area. <br/> Book instantly and park with confidence.</p>
                 <SearchForm />
             </div>
         </section>
