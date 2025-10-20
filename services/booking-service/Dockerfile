@@ -1,4 +1,4 @@
-FROM node:18-alpine
+FROM oven/bun:latest
 
 # Set working directory in the container
 WORKDIR /app
@@ -7,10 +7,10 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install dependencies
-RUN npm install
+RUN bun install
 
 # Copy the rest of your application code
 COPY . .
 
-# Command to run the app using nodemon for development
-CMD ["npm", "run", "dev"]
+# Command to run the app using Bun for development
+CMD ["bun", "run", "dev"]

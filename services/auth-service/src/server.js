@@ -1,6 +1,5 @@
 const express = require('express');
 const cors = require('cors'); // Use the cors library
-require('dotenv').config();
 
 // Import the database instance from the models folder
 const db = require('../models');

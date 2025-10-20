@@ -5,10 +5,6 @@ MIGRATION_SERVICES := auth-service garage-service booking-service
 # This command will be run if you just type `make`
 .DEFAULT_GOAL := help
 
-## --------------------------------------
-## Database Migration Commands
-## --------------------------------------
-
 # pakai kalau tidak ada perubahan codingan di service
 up:
 	@docker-compose up
@@ -19,6 +15,12 @@ up build:
 
 # pakai kalau ada perubahan dependency di package.json
 rebuild:
+	@docker-compose build --no-cache
+	@docker-compose up
+
+clean rebuild:
+	@docker-compose down -v
+	@docker volume prune -f
 	@docker-compose build --no-cache
 	@docker-compose up
 
@@ -33,28 +35,28 @@ migrate-all:
 
 # Usage: make migrate SERVICE=auth-service
 migrate:
-	@echo "🚀 Running database migrations for $(SERVICE)..."
-	@docker-compose exec $(SERVICE) npx sequelize-cli db:migrate
+	@echo "🚀 Running migrations for $(SERVICE)..."
+	@docker-compose exec $(SERVICE) bun sequelize-cli db:migrate
 
 # Usage: make migrate-undo SERVICE=auth-service
 migrate-undo:
 	@echo "⏪ Undoing last migration for $(SERVICE)..."
-	@docker-compose exec $(SERVICE) npx sequelize-cli db:migrate:undo
+	@docker-compose exec $(SERVICE) bun sequelize-cli db:migrate:undo
 
 # Usage: make new-migration SERVICE=auth-service NAME=create-users-table
 new-migration:
-	@echo "✍️  Creating new migration '$(NAME)' for $(SERVICE)..."
-	@docker-compose exec $(SERVICE) npx sequelize-cli migration:generate --name $(NAME)
+	@echo "📝 Creating new migration $(NAME) for $(SERVICE)..."
+	@docker-compose exec $(SERVICE) bun sequelize-cli migration:generate --name $(NAME)
 
 # Usage: make seed SERVICE=auth-service
 seed:
-	@echo "🌱 Seeding database for $(SERVICE)..."
-	@docker-compose exec $(SERVICE) npx sequelize-cli db:seed:all
+	@echo "🌱 Running seeders for $(SERVICE)..."
+	@docker-compose exec $(SERVICE) bun sequelize-cli db:seed:all
 
 # Usage: make admin-seed - Seeds admin user to auth-service database
 admin-seed:
-	@echo "👑 Seeding admin user to auth-service database..."
-	@docker-compose exec auth-service npx sequelize-cli db:seed --seed 20251013205000-create-admin-user.js
+	@echo "👤 Creating admin user in auth-service..."
+	@docker-compose exec auth-service bun sequelize-cli db:seed --seed 20251013205000-create-admin-user.js
 
 ## --------------------------------------
 ## Help Command
