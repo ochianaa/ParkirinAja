@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 
 const LoginPage = () => {
+    
     return (
         <div className="h-screen flex items-center justify-center bg-slate-100">
             <div className="bg-white p-8 rounded-2xl shadow-lg w-1/3">

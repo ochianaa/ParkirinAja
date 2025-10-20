@@ -8,7 +8,7 @@ export const AuthProvider = ({ children }) => {
   // { name: 'Budi', role: 'renter' } = Login sebagai Renter
   // { name: 'Citra', role: 'owner' } = Login sebagai Owner
   // { name: 'Admin Utama', role: 'admin' } = Login sebagai Admin
-  const [user, setUser] = useState({ name: 'Andry', role: 'owner' }); 
+  const [user, setUser] = useState({ name: 'Citra', role: 'owner' }); 
 
   const login = (userData) => setUser(userData);
   const logout = () => setUser(null);
