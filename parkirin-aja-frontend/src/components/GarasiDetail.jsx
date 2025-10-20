@@ -1,13 +1,13 @@
 import { FaHeart, FaRegHeart } from 'react-icons/fa';
 
-const GarageDetailModal = ({ garage, onClose, isFavorited, onToggleFavorite }) => {
+const GarageDetail = ({ garage, onClose, isFavorited, onToggleFavorite }) => {
 
     if (!garage) return null;
 
     return (
         <div 
             onClick={onClose} 
-            className="fixed inset-0 bg-transparent flex justify-center items-center z-50"
+            className="fixed inset-0 bg-black/30 backdrop-blur-sm flex justify-center items-center z-50"
         >
             <div 
                 onClick={(e) => e.stopPropagation()}
@@ -56,4 +56,4 @@ const GarageDetailModal = ({ garage, onClose, isFavorited, onToggleFavorite }) =
     );
 };
 
-export default GarageDetailModal;
+export default GarageDetail;

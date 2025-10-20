@@ -39,13 +39,11 @@ const BookingDetailPage = ({ dummyBookingDetails }) => {
                     <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
                         <img src={dummyBookingDetails.garage.image} alt={dummyBookingDetails.garage.name} className="w-full h-64 object-cover" />
                         <div className="p-8">
-                            {/* Header */}
                             <div className="border-b pb-4 mb-6">
                                 <h2 className="text-3xl font-bold text-slate-800">{dummyBookingDetails.garage.name}</h2>
                                 <p className="text-md text-gray-500 mt-1">{dummyBookingDetails.garage.address}</p>
                             </div>
 
-                            {/* Booking Details */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-md">
                                 <div>
                                     <h4 className="font-semibold text-gray-500">Booking ID</h4>
@@ -65,7 +63,6 @@ const BookingDetailPage = ({ dummyBookingDetails }) => {
                                 </div>
                             </div>
                             
-                            {/* Total Price */}
                             <div className="border-t pt-6 mt-6">
                                 <div className="flex justify-between items-center">
                                     <h3 className="text-xl font-bold text-slate-800">Total Price</h3>
@@ -73,7 +70,6 @@ const BookingDetailPage = ({ dummyBookingDetails }) => {
                                 </div>
                             </div>
 
-                            {/* Action Buttons */}
                             <div className="flex justify-end gap-4 pt-6 mt-6 border-t">
                                 {renderActionButtons()}
                             </div>

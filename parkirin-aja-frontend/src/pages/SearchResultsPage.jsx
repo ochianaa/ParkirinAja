@@ -2,7 +2,7 @@ import { useSearchParams } from 'react-router-dom'
 import { useState } from 'react'
 import Card from '../components/Card'
 import SearchForm from '../components/SearchForm'
-import GarageDetailModal from '../components/GarasiDetailModal'
+import GarageDetail from '../components/GarasiDetail'
 
 
 const SearchResultsPage = ({ favorites, onToggleFavorite, garagesData }) => {
@@ -54,7 +54,7 @@ const SearchResultsPage = ({ favorites, onToggleFavorite, garagesData }) => {
                 ))}
             </div>
 
-            <GarageDetailModal 
+            <GarageDetail 
                 garage={selectedGarage}
                 onClose={handleCloseModal}
                 isFavorited={selectedGarage && favorites.includes(selectedGarage.garage_id)}

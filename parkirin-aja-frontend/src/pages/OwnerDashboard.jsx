@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 
 const OwnerDashboard = () => {
     return (
-        <div className="mx-auto bg-slate-100 py-6 px-35">
+        <div className="min-h-screen bg-slate-100 py-15 px-35">
             <h1 className="text-3xl font-bold text-slate-800 mb-8">Dashboard</h1>
 
             {/* --- Kartu Statistik --- */}

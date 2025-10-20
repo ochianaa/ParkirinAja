@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom';
 import { FaCalendarAlt, FaTag, FaCheckCircle, FaTimesCircle, FaHourglassHalf } from 'react-icons/fa';
 
-// Helper function to get style based on status
 const getStatusInfo = (status) => {
     switch (status) {
         case 'completed':
@@ -17,7 +16,7 @@ const getStatusInfo = (status) => {
 
 const MyBookingPage = ({ dummyBookings }) => {
     return (
-        <div className="min-h-screen bg-slate-100 py-12">
+        <div id="mybookings" className="min-h-screen bg-slate-100 py-12">
             <div className="container mx-auto px-6">
                 <div className="w-full max-w-4xl mx-auto">
                     <h2 className="text-3xl font-bold text-slate-800 mb-6 pb-4">My Bookings</h2>
