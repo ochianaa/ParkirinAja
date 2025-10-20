@@ -6,8 +6,10 @@ const router = express.Router();
 // POST /api/auth/register
 router.post('/register', authController.register);
 
+// POST /api/auth/login
+router.post('/login', authController.login);
+
 // Future routes can be added here:
-// router.post('/login', authController.login);
 // router.post('/logout', authController.logout);
 // router.get('/profile', authMiddleware, authController.getProfile);
 
