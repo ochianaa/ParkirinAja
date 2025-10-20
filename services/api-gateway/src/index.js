@@ -36,5 +36,5 @@ app.use('/api/garages', proxy(process.env.GARAGE_SERVICE_URL, {
 }));
 
 app.listen(PORT, () => {
-  console.log(`API Gateway is live on port ${PORT}`);
+  console.log(`API Gateway is live on port http://localhost:${PORT}`);
 });
