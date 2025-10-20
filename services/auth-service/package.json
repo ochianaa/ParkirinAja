@@ -3,7 +3,11 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "dev": "bun --hot src/server.js"
+    "dev": "bun --hot src/server.js",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "bun src/db/migrate.ts",
+    "db:seed": "bun src/db/seed.ts",
+    "db:studio": "drizzle-kit studio"
   },
   "keywords": [],
   "author": "",
@@ -12,12 +16,13 @@
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
+    "drizzle-orm": "^0.36.4",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
-    "sequelize": "^6.37.7"
+    "pg": "^8.16.3"
   },
   "devDependencies": {
-    "pg": "^8.16.3",
-    "sequelize-cli": "^6.6.3"
+    "drizzle-kit": "^0.30.0",
+    "@types/pg": "^8.11.10"
   }
 }

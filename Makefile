@@ -36,27 +36,31 @@ migrate-all:
 # Usage: make migrate SERVICE=auth-service
 migrate:
 	@echo "🚀 Running migrations for $(SERVICE)..."
-	@docker-compose exec $(SERVICE) bun sequelize-cli db:migrate
+	@docker-compose exec $(SERVICE) npm run db:migrate
 
-# Usage: make migrate-undo SERVICE=auth-service
-migrate-undo:
-	@echo "⏪ Undoing last migration for $(SERVICE)..."
-	@docker-compose exec $(SERVICE) bun sequelize-cli db:migrate:undo
-
-# Usage: make new-migration SERVICE=auth-service NAME=create-users-table
-new-migration:
-	@echo "📝 Creating new migration $(NAME) for $(SERVICE)..."
-	@docker-compose exec $(SERVICE) bun sequelize-cli migration:generate --name $(NAME)
+# Usage: make generate-migration SERVICE=auth-service
+generate-migration:
+	@echo "📝 Generating migration for $(SERVICE)..."
+	@docker-compose exec $(SERVICE) npm run db:generate
 
 # Usage: make seed SERVICE=auth-service
 seed:
 	@echo "🌱 Running seeders for $(SERVICE)..."
-	@docker-compose exec $(SERVICE) bun sequelize-cli db:seed:all
+	@docker-compose exec $(SERVICE) npm run db:seed
 
-# Usage: make admin-seed - Seeds admin user to auth-service database
-admin-seed:
-	@echo "👤 Creating admin user in auth-service..."
-	@docker-compose exec auth-service bun sequelize-cli db:seed --seed 20251013205000-create-admin-user.js
+# Usage: make seed-all - Seeds all services
+seed-all:
+	@echo "🌱 Running seeders for ALL services..."
+	@for service in $(MIGRATION_SERVICES); do \
+		echo "--- Seeding $$service ---"; \
+		$(MAKE) seed SERVICE=$$service; \
+	done
+	@echo "✅ All seeding complete."
+
+# Usage: make studio SERVICE=auth-service - Opens Drizzle Studio for a service
+studio:
+	@echo "🎨 Opening Drizzle Studio for $(SERVICE)..."
+	@docker-compose exec $(SERVICE) npm run db:studio
 
 ## --------------------------------------
 ## Help Command
@@ -64,7 +68,8 @@ admin-seed:
 help:
 	@echo "Available commands:"
 	@echo "  make migrate SERVICE=<name>         - Runs pending migrations for a service."
-	@echo "  make migrate-undo SERVICE=<name>    - Undoes the last migration for a service."
-	@echo "  make new-migration SERVICE=<name> NAME=<name> - Creates a new migration file."
-	@echo "  make seed SERVICE=<name>            - Runs all seeders for a service."
-	@echo "  make admin-seed                     - Seeds admin user to auth-service database."
+	@echo "  make migrate-all                    - Runs migrations for all services."
+	@echo "  make generate-migration SERVICE=<name> - Generates migration files for a service."
+	@echo "  make seed SERVICE=<name>            - Runs seeders for a service."
+	@echo "  make seed-all                       - Runs seeders for all services."
+	@echo "  make studio SERVICE=<name>          - Opens Drizzle Studio for a service."
