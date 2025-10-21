@@ -1,11 +1,11 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');
-const { db, users, roles, userRoles } = require('../../db');
+const { db, users, roles, userRoles } = require('../db');
 const { eq, and, or } = require('drizzle-orm');
 
 const authController = {
-  // Register new user
+  // Register new users
   async register(req, res) {
     try {
       // Validate request

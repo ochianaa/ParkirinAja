@@ -15,7 +15,8 @@ app.get('/', (req, res) => {
 // Health check endpoint
 app.get('/health', async (req, res) => {
   try {
-    await db.select().from('information_schema.tables').limit(1);
+    // Simple connection test using raw SQL
+    await db.execute('SELECT 1');
     res.status(200).json({
       success: true,
       message: 'Garage service is healthy',
@@ -34,7 +35,7 @@ app.listen(PORT, async () => {
   console.log(`Garage Service attempting to start on port ${PORT}...`);
   try {
     // Test the database connection before announcing the server is ready
-    await db.select().from('information_schema.tables').limit(1);
+    await db.execute('SELECT 1');
     console.log('✅ Database connection has been established successfully.');
     console.log(`🚀 Garage Service is now running on port ${PORT}`);
   } catch (error) {

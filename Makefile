@@ -36,17 +36,17 @@ migrate-all:
 # Usage: make migrate SERVICE=auth-service
 migrate:
 	@echo "🚀 Running migrations for $(SERVICE)..."
-	@docker-compose exec $(SERVICE) npm run db:migrate
+	@docker-compose exec $(SERVICE) bun run db:migrate
 
 # Usage: make generate-migration SERVICE=auth-service
 generate-migration:
 	@echo "📝 Generating migration for $(SERVICE)..."
-	@docker-compose exec $(SERVICE) npm run db:generate
+	@docker-compose exec $(SERVICE) bun run db:generate
 
 # Usage: make seed SERVICE=auth-service
 seed:
 	@echo "🌱 Running seeders for $(SERVICE)..."
-	@docker-compose exec $(SERVICE) npm run db:seed
+	@docker-compose exec $(SERVICE) bun run db:seed
 
 # Usage: make seed-all - Seeds all services
 seed-all:
@@ -60,7 +60,7 @@ seed-all:
 # Usage: make studio SERVICE=auth-service - Opens Drizzle Studio for a service
 studio:
 	@echo "🎨 Opening Drizzle Studio for $(SERVICE)..."
-	@docker-compose exec $(SERVICE) npm run db:studio
+	@docker-compose exec $(SERVICE) bun run db:studio
 
 ## --------------------------------------
 ## Help Command
