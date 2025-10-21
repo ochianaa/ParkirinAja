@@ -1,120 +1,113 @@
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { User, Role } = require('../../models');
-const { Op } = require('sequelize');
+const { validationResult } = require('express-validator');
+const { db, users, roles, userRoles } = require('../db');
+const { eq, and, or } = require('drizzle-orm');
 
 const authController = {
-  // Register new user
+  // Register new users
   async register(req, res) {
     try {
+      // Validate request
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({
+          success: false,
+          message: 'Validation failed',
+          errors: errors.array()
+        });
+      }
+
       const { username, email, password, phoneNumber, address, role } = req.body;
 
-      // Validate required fields
-      if (!username || !email || !password) {
-        return res.status(400).json({
-          success: false,
-          message: 'Username, email, and password are required'
-        });
-      }
-
-      // Validate role if provided
-      const allowedRoles = ['renter', 'owner', 'admin'];
-      const userRole = role || 'renter'; // Default to 'renter' if not specified
-
-      if (!allowedRoles.includes(userRole)) {
-        return res.status(400).json({
-          success: false,
-          message: 'Invalid role. Allowed roles are: renter, owner, admin'
-        });
-      }
-
       // Check if user already exists
-      const existingUser = await User.findOne({
-        where: {
-          [Op.or]: [
-            { email: email },
-            { username: username }
-          ]
-        }
-      });
+      const existingUser = await db.select().from(users).where(
+        or(eq(users.email, email), eq(users.username, username))
+      );
 
-      if (existingUser) {
+      if (existingUser.length > 0) {
         return res.status(409).json({
           success: false,
           message: 'User with this email or username already exists'
         });
       }
 
-      // Find the role
-      const roleRecord = await Role.findOne({
-        where: { roleName: userRole }
-      });
-
-      if (!roleRecord) {
-        return res.status(500).json({
-          success: false,
-          message: 'Role configuration error'
-        });
-      }
-
       // Hash password
-      const saltRounds = 8;
+      const saltRounds = 10;
       const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-      // Create new user
-      const newUser = await User.create({
+      // Create user
+      const [newUser] = await db.insert(users).values({
         username,
         email,
         password: hashedPassword,
-        phoneNumber: phoneNumber || null,
-        address: address || null
-      });
+        phoneNumber,
+        address
+      }).returning();
+
+      // Find role (default to 'renter' if not specified)
+      const userRole = role || 'renter';
+      const [roleRecord] = await db.select().from(roles).where(eq(roles.roleName, userRole));
+
+      if (!roleRecord) {
+        return res.status(400).json({
+          success: false,
+          message: `Role '${userRole}' not found`
+        });
+      }
 
       // Assign role to user
-      await newUser.addRole(roleRecord);
-
-      // Fetch user with roles for response
-      const userWithRoles = await User.findByPk(newUser.id, {
-        include: [{
-          model: Role,
-          as: 'roles',
-          attributes: ['id', 'roleName']
-        }]
+      await db.insert(userRoles).values({
+        userId: newUser.id,
+        roleId: roleRecord.id
       });
 
-      // Return success response (password is automatically excluded by toJSON method)
+      // Fetch user with roles for response
+      const userWithRoles = await db.select({
+        id: users.id,
+        username: users.username,
+        email: users.email,
+        phoneNumber: users.phoneNumber,
+        address: users.address,
+        createdAt: users.createdAt,
+        updatedAt: users.updatedAt,
+        roles: roles.roleName
+      }).from(users)
+        .leftJoin(userRoles, eq(users.id, userRoles.userId))
+        .leftJoin(roles, eq(userRoles.roleId, roles.id))
+        .where(eq(users.id, newUser.id));
+
+      // Group roles for the user
+      const userData = {
+        id: userWithRoles[0].id,
+        username: userWithRoles[0].username,
+        email: userWithRoles[0].email,
+        phoneNumber: userWithRoles[0].phoneNumber,
+        address: userWithRoles[0].address,
+        createdAt: userWithRoles[0].createdAt,
+        updatedAt: userWithRoles[0].updatedAt,
+        Roles: userWithRoles.map(row => ({ roleName: row.roles })).filter(role => role.roleName)
+      };
+
       res.status(201).json({
         success: true,
         message: 'User registered successfully',
         data: {
-          user: userWithRoles
+          user: userData
         }
       });
 
     } catch (error) {
       console.error('Registration error:', error);
-
-      // Handle Sequelize validation errors
-      if (error.name === 'SequelizeValidationError') {
-        return res.status(400).json({
-          success: false,
-          message: 'Validation error',
-          errors: error.errors.map(err => ({
-            field: err.path,
-            message: err.message
-          }))
-        });
-      }
-
-      // Handle Sequelize unique constraint errors
-      if (error.name === 'SequelizeUniqueConstraintError') {
+      
+      // Handle unique constraint errors
+      if (error.code === '23505') { // PostgreSQL unique violation
         return res.status(409).json({
           success: false,
-          message: 'User with this email or username already exists'
+          message: 'Email or username already exists'
         });
       }
 
-      // Generic error response
       res.status(500).json({
         success: false,
         message: 'Internal server error during registration'
@@ -125,36 +118,45 @@ const authController = {
   // Login user
   async login(req, res) {
     try {
-      const { email, password } = req.body;
-
-      // Validate required fields
-      if (!email || !password) {
+      // Validate request
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
         return res.status(400).json({
           success: false,
-          message: 'Email and password are required'
+          message: 'Validation failed',
+          errors: errors.array()
         });
       }
 
-      // Find user by email with roles
-      const user = await User.findOne({
-        where: { email: email },
-        include: [{
-          model: Role,
-          as: 'roles',
-          attributes: ['id', 'roleName']
-        }]
-      });
+      const { email, password } = req.body;
 
-      if (!user) {
+      // Find user with roles
+      const userWithRoles = await db.select({
+        id: users.id,
+        username: users.username,
+        email: users.email,
+        password: users.password,
+        phoneNumber: users.phoneNumber,
+        address: users.address,
+        createdAt: users.createdAt,
+        updatedAt: users.updatedAt,
+        roleName: roles.roleName
+      }).from(users)
+        .leftJoin(userRoles, eq(users.id, userRoles.userId))
+        .leftJoin(roles, eq(userRoles.roleId, roles.id))
+        .where(eq(users.email, email));
+
+      if (userWithRoles.length === 0) {
         return res.status(401).json({
           success: false,
           message: 'Invalid email or password'
         });
       }
 
+      const user = userWithRoles[0];
+
       // Verify password
       const isPasswordValid = await bcrypt.compare(password, user.password);
-
       if (!isPasswordValid) {
         return res.status(401).json({
           success: false,
@@ -162,42 +164,42 @@ const authController = {
         });
       }
 
-      // Extract role names for JWT token
-      const userRoles = user.roles.map(role => role.roleName);
+      // Extract user roles
+      const userRoleNames = userWithRoles
+        .map(row => row.roleName)
+        .filter(roleName => roleName);
 
-      // Generate JWT token with roles
+      // Generate JWT token
       const token = jwt.sign(
-        { 
-          userId: user.id, 
+        {
+          userId: user.id,
           email: user.email,
           username: user.username,
-          roles: userRoles
+          roles: userRoleNames
         },
         process.env.JWT_SECRET,
-        { expiresIn: '24h' }
+        { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
       );
 
-      // Return success response with token and user data including roles
+      // Return success response
       res.status(200).json({
         success: true,
         message: 'Login successful',
         data: {
-          token: token,
+          token,
           user: {
             id: user.id,
             username: user.username,
             email: user.email,
             phoneNumber: user.phoneNumber,
             address: user.address,
-            roles: user.roles
+            roles: userRoleNames
           }
         }
       });
 
     } catch (error) {
       console.error('Login error:', error);
-
-      // Generic error response
       res.status(500).json({
         success: false,
         message: 'Internal server error during login'
