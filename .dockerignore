@@ -1,0 +1,15 @@
+# Ignore node_modules
+node_modules
+
+# Ignore npm logs
+npm-debug.log
+
+# Ignore build output folders (if you have them)
+build
+dist
+
+# Ignore .git folder
+.git
+
+# Ignore .env files (these should be injected, not built)
+.env

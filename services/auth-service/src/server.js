@@ -1,9 +1,8 @@
 const express = require('express');
 const cors = require('cors'); // Use the cors library
-require('dotenv').config();
 
-// Import the database instance from the models folder
-const db = require('../models');
+// Import the database instance from the db folder
+const { db } = require('./db');
 const authRoutes = require('./routes/authRoutes');
 
 const app = express();
@@ -43,7 +42,7 @@ app.listen(PORT, async () => {
   console.log(`Auth Service attempting to start on port ${PORT}...`);
   try {
     // Test the database connection before announcing the server is ready
-    await db.sequelize.authenticate();
+    await db.execute('SELECT 1');
     console.log('✅ Database connection has been established successfully.');
     console.log(`🚀 Auth Service is now running on port ${PORT}`);
   } catch (error) {
