@@ -1,12 +1,14 @@
 import { FaHeart, FaRegHeart } from 'react-icons/fa'
 
-const Card = ({ garage, isFavorited, onToggleFavorite }) => {
+const Card = ({ garage, isFavorited, onToggleFavorite, onCardClick }) => {
     const { garage_id, name, image, address, price_per_hour, status } = garage;
 
     return(
         <div className="bg-white rounded-xl shadow-lg overflow-hidden w-full max-w-90 hover:scale-110 transition-transform duration-300">
             <div className="relative">
-                <img className="w-full h-40 object-cover" src={image} alt={name} />
+                <div onClick={onCardClick} className="cursor-pointer">
+                    <img className="w-full h-40 object-cover" src={image} alt={name} />
+                </div>
                 <div className={`absolute top-3 left-3 text-white text-xs font-bold px-2 py-1 rounded ${status === 'available' ? 'bg-green-500' : 'bg-red-500'}`}>
                 {status}
                 </div>
@@ -23,7 +25,7 @@ const Card = ({ garage, isFavorited, onToggleFavorite }) => {
             </div>
 
             <div className="p-4">
-                <div className="mb-2">
+                <div onClick={onCardClick} className="mb-2 cursor-pointer">
                     <h3 className="text-lg font-bold text-gray-800">{name}</h3>
                     <p className="text-sm text-gray-500">{address}</p>
                 </div>
