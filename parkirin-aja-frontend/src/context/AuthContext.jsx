@@ -1,20 +1,35 @@
-import { createContext, useState, useContext } from 'react';
+import { createContext, useState, useContext, useEffect } from 'react';
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  // Ganti nilai awal 'user' untuk testing
-  // null = Belum Login
-  // { name: 'Budi', role: 'renter' } = Login sebagai Renter
-  // { name: 'Citra', role: 'owner' } = Login sebagai Owner
-  // { name: 'Admin Utama', role: 'admin' } = Login sebagai Admin
-  const [user, setUser] = useState({ name: 'Citra', role: 'owner' }); 
 
-  const login = (userData) => setUser(userData);
-  const logout = () => setUser(null);
+  const [user, setUser] = useState(null);
+  const [token, setToken] = useState(localStorage.getItem('token'));
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser && storedUser !== 'undefined') {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
+
+  const login = (userData, tokenData) => {
+    localStorage.setItem('user', JSON.stringify(userData));
+    localStorage.setItem('token', tokenData);
+    setUser(userData);
+    setToken(tokenData);
+  };
+
+  const logout = () => {
+    localStorage.removeItem('user');
+    localStorage.removeItem('token');
+    setUser(null);
+    setToken(null);
+  };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, token, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

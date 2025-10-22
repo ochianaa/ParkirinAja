@@ -1,4 +1,4 @@
-import apiClient from "./ApiClient";
+import apiClient from './ApiClient';
 
 const register = (userData) => {
   return apiClient.post('/auth/register', userData);
@@ -16,11 +16,11 @@ const getProfile = () => {
   return apiClient.get('/auth/profile');
 };
 
-const authService = {
+const AuthService = {
   register,
   login,
   logout,
   getProfile,
 };
 
-export default authService;
+export default AuthService;
