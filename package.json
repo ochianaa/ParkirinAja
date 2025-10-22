@@ -7,6 +7,7 @@
     "docker:build": "docker-compose up --build",
     "docker:rebuild": "docker-compose build --no-cache && docker-compose up",
     "docker:clean": "docker-compose down -v && docker volume prune -f && docker-compose build --no-cache && docker-compose up",
+    "docker:re-clean": "docker-compose down -v && docker volume prune -f && docker-compose build --no-cache && docker-compose up && bun generate:all && bun seed:all",
     
     "migrate:auth": "docker-compose exec auth-service bun run db:migrate",
     "migrate:garage": "docker-compose exec garage-service bun run db:migrate",
@@ -16,6 +17,7 @@
     "generate:auth": "docker-compose exec auth-service bun run db:generate",
     "generate:garage": "docker-compose exec garage-service bun run db:generate",
     "generate:booking": "docker-compose exec booking-service bun run db:generate",
+    "generate:all": "bun run generate:auth && bun run generate:garage && bun run generate:booking",
     
     "seed:auth": "docker-compose exec auth-service bun run db:seed",
     "seed:garage": "docker-compose exec garage-service bun run db:seed",
