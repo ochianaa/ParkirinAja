@@ -6,11 +6,8 @@ WORKDIR /app
 # Copy the package.json file to install dependencies
 COPY package*.json ./
 
-# Install dependencies
-RUN bun install
-
 # Copy the rest of your application code
 COPY . .
 
-# Command to run the app using Bun for development
-CMD ["bun", "run", "dev"]
+# Install dependencies and run the app
+CMD ["sh", "-c", "bun install && bun run dev"]
