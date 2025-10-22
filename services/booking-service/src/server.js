@@ -1,5 +1,6 @@
 const express = require('express');
 const { db } = require('./db');
+const bookingRoutes = require('./src/routes/bookingRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3003;
@@ -8,6 +9,7 @@ const PORT = process.env.PORT || 3003;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Default route for booking service 
 app.get('/', (req, res) => {
   res.send('Hello from the Booking Service! 📅');
 });
@@ -19,18 +21,22 @@ app.get('/health', async (req, res) => {
     await db.execute('SELECT 1');
     res.status(200).json({
       success: true,
-      message: 'Booking service is healthy',
+      message: 'Booking service is healthy✅',
       database: 'connected'
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: 'Database connection failed',
+      message: 'Database connection failed❌',
       error: error.message
     });
   }
 });
 
+// Routes utama
+app.use('/api/bookings', bookingRoutes);
+
+// Server run
 app.listen(PORT, async () => {
   console.log(`Booking Service attempting to start on port ${PORT}...`);
   try {
