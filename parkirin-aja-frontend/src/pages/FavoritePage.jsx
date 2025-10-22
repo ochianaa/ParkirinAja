@@ -5,9 +5,9 @@ const FavoritesPage = ({ garagesData, favorites, onToggleFavorite }) => {
   const favoritedGarages = garagesData.filter(garage => favorites.includes(garage.garage_id))
 
   return (
-    <section id="favorites" className="bg-white py-20">
+    <section id="favorites" className="bg-white py-8">
       <div className="container mx-auto px-6 text-center">
-        <h1 className="text-5xl font-bold text-slate-800 mb-10">Your Favorite Garages</h1>
+        <h1 className="text-3xl font-bold text-slate-800 mb-15">Your Favorite Garages</h1>
         
         {favoritedGarages.length === 0 ? (
           <p className="text-gray-500 mt-10">You haven't favorited any garages yet.</p>
