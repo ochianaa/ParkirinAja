@@ -1,6 +1,6 @@
 const express = require('express');
 const { db } = require('./db');
-const bookingRoutes = require('./src/routes/bookingRoutes');
+const bookingRoutes = require('./routes/bookingRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3003;
@@ -8,6 +8,9 @@ const PORT = process.env.PORT || 3003;
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Routes utama
+app.use('/bookings', bookingRoutes);
 
 // Default route for booking service 
 app.get('/', (req, res) => {
@@ -32,9 +35,6 @@ app.get('/health', async (req, res) => {
     });
   }
 });
-
-// Routes utama
-app.use('/api/bookings', bookingRoutes);
 
 // Server run
 app.listen(PORT, async () => {
