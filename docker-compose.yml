@@ -84,6 +84,8 @@ services:
     restart: unless-stopped
     depends_on:
       - auth-service
+      - garage-service
+      - booking-service
     volumes:
       - ./services/api-gateway:/app
       - /app/node_modules
@@ -91,8 +93,9 @@ services:
       - "8080:8080" 
     environment:
       - PORT=8080
-      - AUTH_SERVICE_URL=http://auth-service:3001
-      - GARAGE_SERVICE_URL=http://garage-service:3002
+      - AUTH_SERVICE_URL=${AUTH_SERVICE_URL}
+      - GARAGE_SERVICE_URL=${GARAGE_SERVICE_URL}
+      - BOOKING_SERVICE_URL=${BOOKING_SERVICE_URL}
 
 volumes:
   postgres_data:

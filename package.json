@@ -1,0 +1,32 @@
+{
+  "name": "parkirin-aja-backend",
+  "version": "1.0.0",
+  "description": "ParkirinAja Microservices Backend",
+  "scripts": {
+    "docker:up": "docker-compose up",
+    "docker:build": "docker-compose up --build",
+    "docker:rebuild": "docker-compose build --no-cache && docker-compose up",
+    "docker:clean": "docker-compose down -v && docker volume prune -f && docker-compose build --no-cache && docker-compose up",
+    
+    "migrate:auth": "docker-compose exec auth-service bun run db:migrate",
+    "migrate:garage": "docker-compose exec garage-service bun run db:migrate",
+    "migrate:booking": "docker-compose exec booking-service bun run db:migrate",
+    "migrate:all": "bun run migrate:auth && bun run migrate:garage && bun run migrate:booking",
+    
+    "generate:auth": "docker-compose exec auth-service bun run db:generate",
+    "generate:garage": "docker-compose exec garage-service bun run db:generate",
+    "generate:booking": "docker-compose exec booking-service bun run db:generate",
+    
+    "seed:auth": "docker-compose exec auth-service bun run db:seed",
+    "seed:garage": "docker-compose exec garage-service bun run db:seed",
+    "seed:booking": "docker-compose exec booking-service bun run db:seed",
+    "seed:all": "bun run seed:auth && bun run seed:garage && bun run seed:booking",
+    
+    "studio:auth": "docker-compose exec auth-service bun run db:studio",
+    "studio:garage": "docker-compose exec garage-service bun run db:studio",
+    "studio:booking": "docker-compose exec booking-service bun run db:studio"
+  },
+  "keywords": ["microservices", "parking", "backend", "drizzle", "postgresql"],
+  "author": "",
+  "license": "ISC"
+}

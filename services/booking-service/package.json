@@ -3,21 +3,23 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon src/server.js"
+    "dev": "bun --hot src/server.js",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "bun src/db/migrate.ts",
+    "db:seed": "bun src/db/seed.ts",
+    "db:studio": "drizzle-kit studio"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "dotenv": "^17.2.3",
     "express": "^5.1.0",
-    "pg-hstore": "^2.3.4",
-    "sequelize": "^6.37.7"
+    "drizzle-orm": "^0.36.4",
+    "pg": "^8.16.3"
   },
   "devDependencies": {
-    "nodemon": "^3.1.10",
-    "pg": "^8.16.3",
-    "sequelize-cli": "^6.6.3"
+    "drizzle-kit": "^0.30.0",
+    "@types/pg": "^8.11.10"
   }
 }
