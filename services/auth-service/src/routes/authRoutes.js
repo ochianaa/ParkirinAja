@@ -130,4 +130,49 @@ router.get('/profile', authMiddleware, authController.getProfile);
 // PUT /api/auth/profile (Login Required)
 router.put('/profile', authMiddleware, updateProfileValidation, authController.updateProfile);
 
+// Validation middleware for admin user update
+const adminUpdateUserValidation = [
+  body('username')
+    .optional()
+    .isLength({ min: 3, max: 50 })
+    .withMessage('Username must be between 3 and 50 characters')
+    .matches(/^[a-zA-Z0-9_]+$/)
+    .withMessage('Username can only contain letters, numbers, and underscores'),
+  body('email')
+    .optional()
+    .isEmail()
+    .withMessage('Please provide a valid email address')
+    .normalizeEmail(),
+  body('phoneNumber')
+    .optional()
+    .isMobilePhone('any')
+    .withMessage('Please provide a valid phone number'),
+  body('address')
+    .optional()
+    .isLength({ max: 255 })
+    .withMessage('Address must not exceed 255 characters'),
+  body('roles')
+    .optional()
+    .isArray()
+    .withMessage('Roles must be an array')
+    .custom((roles) => {
+      const validRoles = ['admin', 'owner', 'renter'];
+      const invalidRoles = roles.filter(role => !validRoles.includes(role));
+      if (invalidRoles.length > 0) {
+        throw new Error(`Invalid roles: ${invalidRoles.join(', ')}. Valid roles are: ${validRoles.join(', ')}`);
+      }
+      return true;
+    })
+];
+
+// === ADMIN ROUTES ===
+// GET /api/auth/users (Admin Only)
+router.get('/users', authMiddleware, adminMiddleware, authController.getAllUsers);
+
+// GET /api/auth/users/:id (Admin Only)
+router.get('/users/:id', authMiddleware, adminMiddleware, authController.getUserById);
+
+// PUT /api/auth/users/:id (Admin Only)
+router.put('/users/:id', authMiddleware, adminMiddleware, adminUpdateUserValidation, authController.updateUserById);
+
 module.exports = router;

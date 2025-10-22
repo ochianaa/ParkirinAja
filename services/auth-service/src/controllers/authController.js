@@ -499,6 +499,270 @@ const authController = {
         message: 'Internal server error during admin registration'
       });
     }
+  },
+
+  // Get all users (Admin only)
+  async getAllUsers(req, res) {
+    try {
+      // Get all users with their roles
+      const usersWithRoles = await db.select({
+        id: users.id,
+        username: users.username,
+        email: users.email,
+        phoneNumber: users.phoneNumber,
+        address: users.address,
+        createdAt: users.createdAt,
+        updatedAt: users.updatedAt,
+        roleName: roles.roleName
+      }).from(users)
+        .leftJoin(userRoles, eq(users.id, userRoles.userId))
+        .leftJoin(roles, eq(userRoles.roleId, roles.id))
+        .orderBy(users.createdAt);
+
+      // Group users with their roles
+      const usersMap = new Map();
+      
+      usersWithRoles.forEach(row => {
+        if (!usersMap.has(row.id)) {
+          usersMap.set(row.id, {
+            id: row.id,
+            username: row.username,
+            email: row.email,
+            phoneNumber: row.phoneNumber,
+            address: row.address,
+            createdAt: row.createdAt,
+            updatedAt: row.updatedAt,
+            roles: []
+          });
+        }
+        
+        if (row.roleName) {
+          usersMap.get(row.id).roles.push(row.roleName);
+        }
+      });
+
+      const allUsers = Array.from(usersMap.values());
+
+      res.status(200).json({
+        success: true,
+        message: 'Users retrieved successfully',
+        data: {
+          users: allUsers,
+          total: allUsers.length
+        }
+      });
+
+    } catch (error) {
+      console.error('Get all users error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Internal server error while retrieving users'
+      });
+    }
+  },
+
+  // Get specific user by ID (Admin only)
+  async getUserById(req, res) {
+    try {
+      const { id } = req.params;
+
+      // Validate ID is a number
+      if (!id || isNaN(parseInt(id))) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid user ID'
+        });
+      }
+
+      // Get user with roles
+      const userWithRoles = await db.select({
+        id: users.id,
+        username: users.username,
+        email: users.email,
+        phoneNumber: users.phoneNumber,
+        address: users.address,
+        createdAt: users.createdAt,
+        updatedAt: users.updatedAt,
+        roleName: roles.roleName
+      }).from(users)
+        .leftJoin(userRoles, eq(users.id, userRoles.userId))
+        .leftJoin(roles, eq(userRoles.roleId, roles.id))
+        .where(eq(users.id, parseInt(id)));
+
+      if (userWithRoles.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: 'User not found'
+        });
+      }
+
+      // Format user data with roles
+      const userData = {
+        id: userWithRoles[0].id,
+        username: userWithRoles[0].username,
+        email: userWithRoles[0].email,
+        phoneNumber: userWithRoles[0].phoneNumber,
+        address: userWithRoles[0].address,
+        createdAt: userWithRoles[0].createdAt,
+        updatedAt: userWithRoles[0].updatedAt,
+        roles: userWithRoles.map(row => row.roleName).filter(Boolean)
+      };
+
+      res.status(200).json({
+        success: true,
+        message: 'User retrieved successfully',
+        data: {
+          user: userData
+        }
+      });
+
+    } catch (error) {
+      console.error('Get user by ID error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Internal server error while retrieving user'
+      });
+    }
+  },
+
+  // Update user by ID (Admin only)
+  async updateUserById(req, res) {
+    try {
+      const { id } = req.params;
+      const { username, email, phoneNumber, address, roles: newRoles } = req.body;
+
+      // Validate ID is a number
+      if (!id || isNaN(parseInt(id))) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid user ID'
+        });
+      }
+
+      const userId = parseInt(id);
+
+      // Check if user exists
+      const [existingUser] = await db.select().from(users).where(eq(users.id, userId));
+      
+      if (!existingUser) {
+        return res.status(404).json({
+          success: false,
+          message: 'User not found'
+        });
+      }
+
+      // Build update object with only provided fields
+      const updateData = {};
+      if (username !== undefined) updateData.username = username;
+      if (email !== undefined) updateData.email = email;
+      if (phoneNumber !== undefined) updateData.phoneNumber = phoneNumber;
+      if (address !== undefined) updateData.address = address;
+
+      // Check for duplicate username/email if provided
+      if (username || email) {
+        const duplicateConditions = [];
+        if (username) duplicateConditions.push(eq(users.username, username));
+        if (email) duplicateConditions.push(eq(users.email, email));
+
+        const duplicateUsers = await db.select().from(users).where(
+          and(
+            or(...duplicateConditions),
+            // Exclude current user from duplicate check
+            eq(users.id, userId)
+          )
+        );
+
+        // If no results, check if username/email is taken by someone else
+        if (duplicateUsers.length === 0) {
+          const takenByOthers = await db.select().from(users).where(
+            or(...duplicateConditions)
+          );
+          
+          if (takenByOthers.length > 0) {
+            return res.status(409).json({
+              success: false,
+              message: 'Username or email already exists'
+            });
+          }
+        }
+      }
+
+      // Update user data if there are changes
+      if (Object.keys(updateData).length > 0) {
+        updateData.updatedAt = new Date();
+        await db.update(users)
+          .set(updateData)
+          .where(eq(users.id, userId));
+      }
+
+      // Update roles if provided
+      if (newRoles && Array.isArray(newRoles)) {
+        // Remove existing roles
+        await db.delete(userRoles).where(eq(userRoles.userId, userId));
+
+        // Add new roles
+        for (const roleName of newRoles) {
+          const [role] = await db.select().from(roles).where(eq(roles.roleName, roleName));
+          
+          if (role) {
+            await db.insert(userRoles).values({
+              userId: userId,
+              roleId: role.id
+            });
+          }
+        }
+      }
+
+      // Get updated user with roles
+      const updatedUserWithRoles = await db.select({
+        id: users.id,
+        username: users.username,
+        email: users.email,
+        phoneNumber: users.phoneNumber,
+        address: users.address,
+        createdAt: users.createdAt,
+        updatedAt: users.updatedAt,
+        roleName: roles.roleName
+      }).from(users)
+        .leftJoin(userRoles, eq(users.id, userRoles.userId))
+        .leftJoin(roles, eq(userRoles.roleId, roles.id))
+        .where(eq(users.id, userId));
+
+      const userData = {
+        id: updatedUserWithRoles[0].id,
+        username: updatedUserWithRoles[0].username,
+        email: updatedUserWithRoles[0].email,
+        phoneNumber: updatedUserWithRoles[0].phoneNumber,
+        address: updatedUserWithRoles[0].address,
+        createdAt: updatedUserWithRoles[0].createdAt,
+        updatedAt: updatedUserWithRoles[0].updatedAt,
+        roles: updatedUserWithRoles.map(row => row.roleName).filter(Boolean)
+      };
+
+      res.status(200).json({
+        success: true,
+        message: 'User updated successfully',
+        data: {
+          user: userData
+        }
+      });
+
+    } catch (error) {
+      console.error('Update user by ID error:', error);
+      
+      // Handle unique constraint errors
+      if (error.code === '23505') {
+        return res.status(409).json({
+          success: false,
+          message: 'Username or email already exists'
+        });
+      }
+
+      res.status(500).json({
+        success: false,
+        message: 'Internal server error while updating user'
+      });
+    }
   }
 };
 
