@@ -31,3 +31,4 @@ router.get('/admin/bookings',
 router.get('/admin/analytics', bookingController.getAnalyticsSummary); // Mendapatkan data analitik keseluruhan
 
 module.exports = router;
+
