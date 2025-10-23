@@ -16,11 +16,16 @@ const getProfile = () => {
   return apiClient.get('/auth/profile');
 };
 
+const updateProfile = (profileData) => {
+  return apiClient.put('/auth/profile', profileData);
+};
+
 const AuthService = {
   register,
   login,
   logout,
   getProfile,
+  updateProfile,
 };
 
 export default AuthService;
