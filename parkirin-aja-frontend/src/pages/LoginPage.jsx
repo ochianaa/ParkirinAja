@@ -23,11 +23,20 @@ const LoginPage = () => {
         try {
             const response = await AuthService.login(formData);
             
-            login(response.data.user, response.data.token);
+            // 1. "Buka tas besar" dengan mengakses 'response.data.data'
+            const responseData = response.data.data;
+            const userData = responseData.user;
+            const tokenData = responseData.token;
 
-            const userRole = response.data.user.role;
+            // 2. Ambil role pertama dari array 'roles'
+            const userRole = userData.roles && userData.roles.length > 0 ? userData.roles[0] : null;
+
+            // 3. Simpan data user yang sudah benar ke context
+            // Kita juga tambahkan role yang sudah diekstrak ke objek user agar mudah diakses
+            login({ ...userData, role: userRole }, tokenData);
+
             if (userRole === 'renter') {
-                navigate('/features');
+                navigate('/');
             } else if (userRole === 'owner') {
                 navigate('/owner/dashboard');
             } else if (userRole === 'admin') {

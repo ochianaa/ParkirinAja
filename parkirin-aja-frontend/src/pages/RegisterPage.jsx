@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
 import authService from '../api/AuthService';
 
 const RegisterPage = () => {
@@ -10,12 +9,11 @@ const RegisterPage = () => {
         username: '',
         email: '',
         password: '',
-        phone_number: '',
+        phoneNumber: '',
         address: '',
     });
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
-    const { login } = useAuth();
     const navigate = useNavigate();
 
     const handleChange = (e) => {
@@ -29,14 +27,10 @@ const RegisterPage = () => {
         const payload = { ...formData, role };
 
         try {
-            const response = await authService.register(payload);
-            
-            // Langsung loginkan setelah berhasil registrasi
-            login(response.data.user, response.data.token);
+            await authService.register(payload);
 
-            // Arahkan ke halaman yang sesuai
-            navigate(role === 'owner' ? '/owner/dashboard' : '/');
-            
+            navigate('/login');
+
         } catch (err) {
             setError(err.response?.data?.message || 'Registration failed. Please try again.');
         } finally {
@@ -63,7 +57,7 @@ const RegisterPage = () => {
                     <input name="username" type="text" placeholder="Username" required className="w-full p-3 border border-gray-300 rounded-lg" value={formData.username} onChange={handleChange} />
                     <input name="email" type="email" placeholder="Email" required className="w-full p-3 border border-gray-300 rounded-lg" value={formData.email} onChange={handleChange} />
                     <input name="password" type="password" placeholder="Password" required className="w-full p-3 border border-gray-300 rounded-lg" value={formData.password} onChange={handleChange} />
-                    <input name="phone_number" type="tel" placeholder="Phone Number" required className="w-full p-3 border border-gray-300 rounded-lg" value={formData.phone_number} onChange={handleChange} />
+                    <input name="phoneNumber" type="tel" placeholder="Phone Number" required className="w-full p-3 border border-gray-300 rounded-lg" value={formData.phoneNumber} onChange={handleChange} />
                     <textarea name="address" placeholder="Address" required rows="2" className="w-full p-3 border border-gray-300 rounded-lg" value={formData.address} onChange={handleChange} ></textarea>
                     
                     <button type="submit" className="w-full p-3 bg-slate-800 text-white rounded-lg font-semibold border hover:bg-transparent hover:text-gray-600">
