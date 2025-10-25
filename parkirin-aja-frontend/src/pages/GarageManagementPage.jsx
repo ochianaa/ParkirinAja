@@ -1,10 +1,10 @@
-const GarageManagementPage = () => {
+const GarageManagementPage = ({dummyGarages}) => {
     return (
         <div className="min-h-screen bg-slate-100 py-15 px-35">
-            <h1 className="text-3xl font-bold text-slate-800 mb-8">Garage Management</h1>
+            <h1 className="text-3xl font-bold text-slate-800 mb-15">Garage Management</h1>
             <div className="bg-white rounded-lg shadow-md overflow-x-auto">
                 <table className="w-full text-left">
-                    <thead className="bg-gray-50">
+                    <thead className="bg-slate-800 text-gray-300">
                         <tr>
                             <th className="p-4 font-semibold text-sm">Garage Name</th>
                             <th className="p-4 font-semibold text-sm">Owner</th>

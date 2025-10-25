@@ -26,7 +26,7 @@ const garagesData = [
     name: 'Garasi Aman Downtown',
     address: 'Jl. Jenderal Sudirman No. 12, Jakarta Pusat',
     description: 'Garasi indoor yang aman dengan penjagaan 24 jam.',
-    price_per_hour: 500000,
+    price_per_hour: 15000,
     status: 'available',
   },
   {
@@ -35,7 +35,7 @@ const garagesData = [
     name: 'Parkir Ekspres Kuta',
     address: 'Jl. Pantai Kuta No. 8, Kuta, Bali',
     description: 'Lokasi strategis dekat pantai, cocok untuk wisatawan.',
-    price_per_hour: 1000000,
+    price_per_hour: 20000,
     status: 'available',
   },
   {
@@ -44,7 +44,7 @@ const garagesData = [
     name: 'Garasi Murah Meriah',
     address: 'Jl. Cihampelas No. 160, Bandung',
     description: 'Pilihan hemat untuk parkir harian di pusat perbelanjaan.',
-    price_per_hour: 800000,
+    price_per_hour: 30000,
     status: 'unavailable',
   },
 ];
@@ -69,9 +69,9 @@ const dummyBookingDetails = {
 };
 
 const dummyRequests = [
-    { id: 1, renterName: 'Budi Santoso', garageName: 'Garasi Aman Downtown', dateRange: '20 Oct - 22 Oct 2025', amount: 500000 },
-    { id: 2, renterName: 'Citra Lestari', garageName: 'Parkir Ekspres Kuta', dateRange: '25 Oct - 26 Oct 2025', amount: 1000000 },
-    { id: 3, renterName: 'Agus Wijaya', garageName: 'Garasi Aman Downtown', dateRange: '01 Nov - 03 Nov 2025', amount: 750000 },
+    { id: 1, renterName: 'Budi Santoso', garageName: 'Garasi Aman Downtown', dateRange: '20 Oct - 22 Oct 2025', amount: 15000 },
+    { id: 2, renterName: 'Citra Lestari', garageName: 'Parkir Ekspres Kuta', dateRange: '25 Oct - 26 Oct 2025', amount: 20000 },
+    { id: 3, renterName: 'Agus Wijaya', garageName: 'Garasi Aman Downtown', dateRange: '01 Nov - 03 Nov 2025', amount: 30000 },
 ];
 
 const dummyTransactions = [

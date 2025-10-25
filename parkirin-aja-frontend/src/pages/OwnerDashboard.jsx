@@ -7,22 +7,22 @@ const OwnerDashboard = () => {
 
             {/* --- Kartu Statistik --- */}
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-8">
-                <div className="rounded-lg border bg-white p-6">
-                    <h3 className="text-sm font-medium text-gray-500">Total Revenue (This Month)</h3>
+                <div className="rounded-lg border-1 shadow-lg shadow-black/50 bg-slate-800 text-gray-300 p-6 border-gray-300">
+                    <h3 className="text-sm font-medium text-gray-300">Total Revenue (This Month)</h3>
                     <p className="text-3xl font-bold mt-2">Rp 15.000.000</p>
                 </div>
-                <div className="rounded-lg border bg-white p-6">
-                    <h3 className="text-sm font-medium text-gray-500">Pending Requests</h3>
+                <div className="rounded-lg border-1 shadow-lg shadow-black/50 bg-slate-800 text-gray-300 p-6 border-gray-300">
+                    <h3 className="text-sm font-medium text-gray-300">Pending Requests</h3>
                     <p className="text-3xl font-bold mt-2">5</p>
                 </div>
-                <div className="rounded-lg border bg-white p-6">
-                    <h3 className="text-sm font-medium text-gray-500">Active Garages</h3>
+                <div className="rounded-lg border-1 shadow-lg shadow-black/50 bg-slate-800 text-gray-300 p-6 border-gray-300">
+                    <h3 className="text-sm font-medium text-gray-300">Active Garages</h3>
                     <p className="text-3xl font-bold mt-2">3</p>
                 </div>
             </div>
 
             {/* --- Permintaan Booking Terbaru --- */}
-            <div className="rounded-lg border bg-white p-6">
+            <div className="mt-15 rounded-lg border bg-white p-6 shadow-lg">
                 <div className="flex justify-between items-center mb-4">
                     <h3 className="text-xl font-bold">Recent Booking Requests</h3>
                     <Link to="/owner/requests" className="text-sm font-semibold text-slate-800 hover:underline">View All</Link>

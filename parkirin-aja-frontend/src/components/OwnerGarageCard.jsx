@@ -2,7 +2,7 @@ import { FaEdit, FaTrash } from 'react-icons/fa';
 import { useState } from 'react';
 import EditGarageOwner from './EditGarageOwner';
 
-const OwnerGarageCard = ({ garage, onEdit, onDelete }) => {
+const OwnerGarageCard = ({ garage, onDelete }) => {
 
     const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -10,24 +10,35 @@ const OwnerGarageCard = ({ garage, onEdit, onDelete }) => {
 
     const statusColor = status === 'available' ? 'text-green-600' : 'text-red-600';
 
-    return (
-        <>   
-            <div className="bg-white rounded-lg shadow-md overflow-hidden">
-                <img src={image} alt={name} className="w-full h-40 object-cover" />
-                <div className="p-4">
-                    <h3 className="text-lg font-bold text-slate-800">{name}</h3>
-                    <p className={`text-sm font-semibold capitalize ${statusColor}`}>{status}</p>
-                    <p className="text-md font-bold text-gray-900 mt-2">
-                        Rp {Number(price_per_hour).toLocaleString('id-ID')}
-                        <span className="text-sm font-normal text-gray-500">/month</span>
-                    </p>
-                    <div className="flex justify-end gap-2 mt-4">
-                        <button onClick={() => setIsModalOpen(true)} className="p-2 text-gray-500 hover:text-blue-600" aria-label="Edit Garage">
-                            <FaEdit />
-                        </button>
-                        <button onClick={onDelete} className="p-2 text-gray-500 hover:text-red-600" aria-label="Delete Garage">
-                            <FaTrash />
-                        </button>
+    return(
+        <>
+            <div className="bg-white rounded-xl shadow-lg overflow-hidden w-full max-w-90 hover:scale-105 transition-transform duration-300">
+                <div className="relative">
+                    <div className="cursor-pointer">
+                        <img className="w-full h-40 object-cover" src={image} alt={name} />
+                    </div>
+                </div>
+
+                <div className="p-5">
+                    <div className="mb-2 cursor-pointer">
+                        <h3 className="text-lg font-bold text-gray-800">{name}</h3>
+                    </div>
+                    <div>
+                        <p className={`text-sm font-semibold capitalize ${statusColor}`}>{status}</p>
+                    </div>
+                    <div className="flex justify-between items-center mt-4">
+                        <p className="text-lg font-bold text-gray-900">
+                            Rp {Number(price_per_hour).toLocaleString('id-ID')}
+                            <span className="text-sm font-normal text-gray-500"> /hour</span>
+                        </p>
+                        <div className="flex justify-center">
+                            <button onClick={() => setIsModalOpen(true)} className="p-1 text-gray-500 hover:text-blue-600" aria-label="Edit Garage">
+                                <FaEdit className='h-6 w-6'/>
+                            </button>
+                            <button onClick={onDelete} className="p-1 text-gray-500 hover:text-red-600" aria-label="Delete Garage">
+                                <FaTrash className='h-6 w-6'/>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -37,7 +48,8 @@ const OwnerGarageCard = ({ garage, onEdit, onDelete }) => {
                 onClose={() => setIsModalOpen(false)} 
             />
         </>
-    );
-};
+        
+    )
+}
 
-export default OwnerGarageCard;
+export default OwnerGarageCard
