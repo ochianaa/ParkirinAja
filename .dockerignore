@@ -1,15 +1,41 @@
-# Ignore node_modules
+// ... existing code ...
+
+# Ignore node_modules (will be installed in container)
 node_modules
 
 # Ignore npm logs
-npm-debug.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
 # Ignore build output folders (if you have them)
 build
 dist
+*.tsbuildinfo
 
 # Ignore .git folder
 .git
+.gitignore
 
 # Ignore .env files (these should be injected, not built)
 .env
+.env.local
+.env.*.local
+
+# Ignore OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Ignore IDE files
+.vscode
+.idea
+*.swp
+*.swo
+
+# Don't ignore bun.lock files - they're needed for reproducible builds
+!bun.lock
