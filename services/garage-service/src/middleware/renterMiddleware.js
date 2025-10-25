@@ -1,5 +1,5 @@
 
-const isRenter = (req, res, next) => {
+const renterMiddleware = (req, res, next) => {
   try {
     if (!req.user) {
       return res.status(401).json({
@@ -8,9 +8,8 @@ const isRenter = (req, res, next) => {
       });
     }
 
-    const roles = Array.isArray(req.user.role)
-      ? req.user.role
-      : [req.user.role];
+    const rawRoles = req.user.roles ?? req.user.role;
+    const roles = Array.isArray(rawRoles) ? rawRoles : (rawRoles ? [rawRoles] : []);
 
     if (!roles.includes("renter")) {
       return res.status(403).json({
@@ -29,4 +28,4 @@ const isRenter = (req, res, next) => {
   }
 };
 
-module.exports = { isRenter };
+module.exports = { renterMiddleware };

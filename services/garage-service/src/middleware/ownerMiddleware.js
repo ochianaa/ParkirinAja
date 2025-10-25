@@ -1,5 +1,5 @@
 
-const isOwner = (req, res, next) => {
+const ownerMiddleware = (req, res, next) => {
   try {
     if (!req.user) {
       return res.status(401).json({
@@ -8,11 +8,8 @@ const isOwner = (req, res, next) => {
       });
     }
 
-    // Check for both 'roles' and 'role' properties in the JWT payload
-    const userRoles = req.user.roles || req.user.role;
-    const roles = Array.isArray(userRoles)
-      ? userRoles
-      : [userRoles];
+    const rawRoles = req.user.roles ?? req.user.role;
+    const roles = Array.isArray(rawRoles) ? rawRoles : (rawRoles ? [rawRoles] : []);
 
     if (!roles.includes("owner")) {
       return res.status(403).json({
@@ -31,4 +28,4 @@ const isOwner = (req, res, next) => {
   }
 };
 
-module.exports = { isOwner };
+module.exports = { ownerMiddleware };

@@ -1,6 +1,5 @@
 const express = require('express');
 const { db } = require('./db');
-const garageRoutes = require('./routes/garageRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3002;
@@ -9,8 +8,12 @@ const PORT = process.env.PORT || 3002;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Routes
+const garageRoutes = require('./routes/garageRoutes');
 app.use('/', garageRoutes);
+
+app.get('/', (req, res) => {
+  res.send('Hello from the Garage Service! 🏠');
+});
 
 // Health check endpoint
 app.get('/health', async (req, res) => {

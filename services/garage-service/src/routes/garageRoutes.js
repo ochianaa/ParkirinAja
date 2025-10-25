@@ -2,31 +2,14 @@
 const express = require('express');
 const { body } = require('express-validator');
 const garageController = require('../controllers/garageController');
-const { db } = require('../db');
 
-// Middlewares
-const { authenticate } = require('../middleware/authMiddleware');
-const { isAdmin } = require('../middleware/adminMiddleware');
-const { isOwner } = require('../middleware/ownerMiddleware');
-const { isRenter } = require('../middleware/renterMiddleware');
+// Middlewares (aligned names)
+const { authMiddleware } = require('../middleware/authMiddleware');
+const { adminMiddleware } = require('../middleware/adminMiddleware');
+const { ownerMiddleware } = require('../middleware/ownerMiddleware');
+const { renterMiddleware } = require('../middleware/renterMiddleware');
 
 const router = express.Router();
-
-/* ---------------------------------------------
-   HEALTH CHECK
-----------------------------------------------*/
-router.get('/health', async (req, res) => {
-  try {
-    await db.execute('SELECT 1');
-    res.json({ status: 'healthy', service: 'garage-service' });
-  } catch (error) {
-    res.status(503).json({
-      status: 'unhealthy',
-      service: 'garage-service',
-      error: error.message,
-    });
-  }
-});
 
 /* ---------------------------------------------
    VALIDATION RULES
@@ -38,17 +21,9 @@ const garageValidation = [
   body('address')
     .isLength({ min: 5 })
     .withMessage('Address must be at least 5 characters long'),
-  body(['pricePerHour', 'price_per_hour'])
-    .custom((value, { req }) => {
-      const pricePerHour = req.body.pricePerHour;
-      const price_per_hour = req.body.price_per_hour;
-      const finalPrice = price_per_hour || pricePerHour;
-      
-      if (!finalPrice || isNaN(finalPrice)) {
-        throw new Error('Price per hour must be a valid number');
-      }
-      return true;
-    }),
+  body('pricePerHour')
+    .isNumeric()
+    .withMessage('Price per hour must be a number'),
   body('status')
     .optional()
     .isIn(['available', 'unavailable'])
@@ -58,47 +33,47 @@ const garageValidation = [
 /* ---------------------------------------------
    ROUTES - PUBLIC
 ----------------------------------------------*/
-// GET / - Get all garages (public)
-router.get('/', garageController.getAllGarages);
+// GET /garages - Get all garages (public)
+router.get('/garages', garageController.getAllGarages);
 
-// GET /:id - Get detail of a garage (public)
-router.get('/:id', garageController.getGarageById);
+// GET /garages/:id - Get detail of a garage (public)
+router.get('/garages/:id', garageController.getGarageById);
 
-// GET /:id/reviews - Get all reviews for a garage (public)
-router.get('/:id/reviews', garageController.getGarageReviews);
+// Optional: reviews stub
+router.get('/garages/:id/reviews', garageController.getGarageReviews);
 
 /* ---------------------------------------------
-   OWNER ROUTES
+   ROUTES - OWNER (Pemilik)
 ----------------------------------------------*/
-// Create a new garage (owner only)
-router.post('/', authenticate, isOwner, garageValidation, garageController.createGarage);
+// POST /garages - Add new garage
+router.post('/garages', authMiddleware, ownerMiddleware, garageValidation, garageController.createGarage);
 
-// Get my garages (owner only)
-router.get('/owner/my-garages', authenticate, isOwner, garageController.getMyGarages);
+// GET /owner/my-garages - Get list of owner's garages
+router.get('/owner/my-garages', authMiddleware, ownerMiddleware, garageController.getMyGarages);
 
-// Update garage (owner only)
-router.put('/:id', authenticate, isOwner, garageValidation, garageController.updateGarage);
+// PUT /garages/:id - Update garage details
+router.put('/garages/:id', authMiddleware, ownerMiddleware, garageValidation, garageController.updateGarage);
 
-// Delete garage (owner only)
-router.delete('/:id', authenticate, isOwner, garageController.deleteGarage);
+// DELETE /garages/:id - Delete a garage
+router.delete('/garages/:id', authMiddleware, ownerMiddleware, garageController.deleteGarage);
 
 /* ---------------------------------------------
    ROUTES - RENTER (Penyewa)
 ----------------------------------------------*/
 // GET /favorites - Get favorite garages of renter
-router.get('/favorites', authenticate, isRenter, garageController.getFavorites);
+router.get('/favorites', authMiddleware, renterMiddleware, garageController.getFavorites);
 
 // POST /favorites - Add a garage to favorites
-router.post('/favorites', authenticate, isRenter, body('garageId').isInt().withMessage('Garage ID is required'), garageController.addFavorite);
+router.post('/favorites', authMiddleware, renterMiddleware, body('garageId').isInt().withMessage('Garage ID is required'), garageController.addFavorite);
 
 // DELETE /favorites/:garageId - Remove a garage from favorites
-router.delete('/favorites/:garageId', authenticate, isRenter, garageController.removeFavorite);
+router.delete('/favorites/:garageId', authMiddleware, renterMiddleware, garageController.removeFavorite);
 
 /* ---------------------------------------------
    ROUTES - ADMIN
 ----------------------------------------------*/
-// PUT /admin/:id/status - Update garage status (approve, reject, feature)
-router.put('/admin/:id/status', authenticate, isAdmin, body('status')
+// PUT /admin/garages/:id/status - Update garage status (approve, reject, feature)
+router.put('/admin/garages/:id/status', authMiddleware, adminMiddleware, body('status')
   .isIn(['approved', 'rejected', 'featured'])
   .withMessage('Status must be one of: approved, rejected, featured'), garageController.updateGarageStatus);
 
