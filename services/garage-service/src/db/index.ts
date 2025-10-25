@@ -1,10 +1,15 @@
+
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
 import * as schema from './schema';
 
+// Create connection pool
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL || 'postgresql://postgres:password@localhost:5432/parkirinaja_db'
+  connectionString: process.env.DATABASE_URL,
 });
 
+// Create drizzle instance
 export const db = drizzle(pool, { schema });
-export { garages } from './schema';
+
+// Export schema for use in other files
+export * from './schema’;

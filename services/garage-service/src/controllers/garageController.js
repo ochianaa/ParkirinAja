@@ -1,7 +1,9 @@
-import Garage from "../models/garageModel.js";
+
+const Garage = require("../models/garageModel");
+const { validationResult } = require("express-validator");
 
 // (Publik)
-export const getAllGarages = async (req, res) => {
+const getAllGarages = async (req, res) => {
   try {
     const garages = await Garage.findAll();
     res.json(garages);
@@ -11,7 +13,7 @@ export const getAllGarages = async (req, res) => {
 };
 
 // (Publik)
-export const getGarageById = async (req, res) => {
+const getGarageById = async (req, res) => {
   try {
     const garage = await Garage.findByPk(req.params.id);
     if (!garage) return res.status(404).json({ message: "Garage not found" });
@@ -21,61 +23,173 @@ export const getGarageById = async (req, res) => {
   }
 };
 
-// (Pemilik)
-export const createGarage = async (req, res) => {
+// (Owner)
+const createGarage = async (req, res) => {
   try {
-    const newGarage = await Garage.create({ ...req.body, owner_id: req.user.id });
-    res.status(201).json(newGarage);
+    // Check validation errors
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Validation failed',
+        errors: errors.array()
+      });
+    }
+
+    const { name, address, description, pricePerHour, price_per_hour, status } = req.body;
+    
+    // Handle both camelCase and snake_case for price
+    const finalPrice = price_per_hour || pricePerHour;
+    
+    const garageData = {
+      owner_id: req.user.userId,
+      name,
+      address,
+      description,
+      price_per_hour: finalPrice,
+      status: status || 'available'
+    };
+    
+    const garage = await Garage.create(garageData);
+    res.status(201).json({
+      success: true,
+      message: 'Garage created successfully',
+      data: garage
+    });
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    console.error('Create garage error:', err);
+    res.status(400).json({ 
+      success: false,
+      error: err.message 
+    });
+  }
+};
+
+// (Owner)
+const getMyGarages = async (req, res) => {
+  try {
+    const garages = await Garage.findByOwner(req.user.userId);
+    res.json({
+      success: true,
+      data: garages
+    });
+  } catch (err) {
+    res.status(500).json({ 
+      success: false,
+      error: err.message 
+    });
+  }
+};
+
+// (Owner)
+const updateGarage = async (req, res) => {
+  try {
+    // Check validation errors
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Validation failed',
+        errors: errors.array()
+      });
+    }
+
+    const garage = await Garage.findByPk(req.params.id);
+    if (!garage) return res.status(404).json({ message: "Garage not found" });
+    if (garage.owner_id !== req.user.userId) return res.status(403).json({ message: "Forbidden" });
+    
+    const { name, address, description, pricePerHour, price_per_hour, status } = req.body;
+    const finalPrice = price_per_hour || pricePerHour;
+    
+    const updateData = {
+      ...(name && { name }),
+      ...(address && { address }),
+      ...(description && { description }),
+      ...(finalPrice && { price_per_hour: finalPrice }),
+      ...(status && { status })
+    };
+    
+    const updatedGarage = await Garage.update(req.params.id, updateData);
+    res.json({
+      success: true,
+      message: 'Garage updated successfully',
+      data: updatedGarage
+    });
+  } catch (err) {
+    res.status(400).json({ 
+      success: false,
+      error: err.message 
+    });
   }
 };
 
 // (Pemilik)
-export const getMyGarages = async (req, res) => {
-  try {
-    const garages = await Garage.findAll({ where: { owner_id: req.user.id } });
-    res.json(garages);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
-
-// (Pemilik)
-export const updateGarage = async (req, res) => {
+const deleteGarage = async (req, res) => {
   try {
     const garage = await Garage.findByPk(req.params.id);
-    if (!garage || garage.owner_id !== req.user.id)
+    if (!garage || garage.owner_id !== req.user.userId)
       return res.status(403).json({ message: "Unauthorized" });
-    await garage.update(req.body);
-    res.json(garage);
+    
+    await Garage.delete(req.params.id);
+    res.json({ 
+      success: true,
+      message: "Garage deleted successfully" 
+    });
   } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
-};
-
-// (Pemilik)
-export const deleteGarage = async (req, res) => {
-  try {
-    const garage = await Garage.findByPk(req.params.id);
-    if (!garage || garage.owner_id !== req.user.id)
-      return res.status(403).json({ message: "Unauthorized" });
-    await garage.destroy();
-    res.json({ message: "Garage deleted" });
-  } catch (err) {
-    res.status(400).json({ error: err.message });
+    res.status(500).json({ 
+      success: false,
+      error: err.message 
+    });
   }
 };
 
 // (Admin)
-export const updateGarageStatus = async (req, res) => {
+const updateGarageStatus = async (req, res) => {
   try {
     const garage = await Garage.findByPk(req.params.id);
     if (!garage) return res.status(404).json({ message: "Garage not found" });
-    garage.status = req.body.status;
-    await garage.save();
-    res.json(garage);
+    
+    const updatedGarage = await Garage.update(req.params.id, { status: req.body.status });
+    res.json({
+      success: true,
+      message: 'Garage status updated successfully',
+      data: updatedGarage
+    });
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    res.status(400).json({ 
+      success: false,
+      error: err.message 
+    });
   }
+};
+
+// Missing functions that are referenced in routes but not implemented
+const getGarageReviews = async (req, res) => {
+  res.status(501).json({ message: "Reviews feature not implemented yet" });
+};
+
+const getFavorites = async (req, res) => {
+  res.status(501).json({ message: "Favorites feature not implemented yet" });
+};
+
+const addFavorite = async (req, res) => {
+  res.status(501).json({ message: "Add favorite feature not implemented yet" });
+};
+
+const removeFavorite = async (req, res) => {
+  res.status(501).json({ message: "Remove favorite feature not implemented yet" });
+};
+
+module.exports = {
+  getAllGarages,
+  getGarageById,
+  createGarage,
+  getMyGarages,
+  updateGarage,
+  deleteGarage,
+  updateGarageStatus,
+  getGarageReviews,
+  getFavorites,
+  addFavorite,
+  removeFavorite
 };

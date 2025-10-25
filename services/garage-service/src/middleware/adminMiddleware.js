@@ -1,4 +1,5 @@
-export const adminMiddleware = (req, res, next) => {
+
+const isAdmin = (req, res, next) => {
   try {
     if (!req.user) {
       return res.status(401).json({
@@ -28,3 +29,5 @@ export const adminMiddleware = (req, res, next) => {
     });
   }
 };
+
+module.exports = { isAdmin };

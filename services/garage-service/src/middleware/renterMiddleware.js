@@ -1,4 +1,5 @@
-export const renterMiddleware = (req, res, next) => {
+
+const isRenter = (req, res, next) => {
   try {
     if (!req.user) {
       return res.status(401).json({
@@ -27,3 +28,5 @@ export const renterMiddleware = (req, res, next) => {
     });
   }
 };
+
+module.exports = { isRenter };

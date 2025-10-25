@@ -1,3 +1,4 @@
+
 import { pgTable, serial, integer, varchar, text, decimal, timestamp } from 'drizzle-orm/pg-core';
 
 export const garages = pgTable('Garages', {
@@ -12,5 +13,6 @@ export const garages = pgTable('Garages', {
   updated_at: timestamp('updated_at').notNull().defaultNow()
 });
 
+// Export types for TypeScript
 export type Garage = typeof garages.$inferSelect;
 export type NewGarage = typeof garages.$inferInsert;
