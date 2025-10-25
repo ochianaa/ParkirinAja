@@ -72,6 +72,7 @@ services:
       - PORT=3003
       - GARAGE_SERVICE_URL=http://garage-service:3002
       - AUTH_SERVICE_URL=http://auth-service:3001
+      - JWT_SECRET=${JWT_SECRET}
     expose:
       - "3003"
     
@@ -97,3 +98,5 @@ services:
 
 volumes:
   postgres_data:
+
+  
