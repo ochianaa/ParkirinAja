@@ -1,10 +1,17 @@
 import logo from '../assets/LogoBiruGold.png'
 import { NavHashLink as Link } from 'react-router-hash-link'
 import { useAuth } from '../context/AuthContext'
+import { useNavigate } from 'react-router-dom'
 
 const Navbar = () => {
 
     const { user, logout } = useAuth();
+    const navigate = useNavigate();
+
+    const handleLogout = async () => {
+        await logout();
+        navigate('/login');
+    }
 
     const scrollWithOffset = (el) => {
     const yCoordinate = el.getBoundingClientRect().top + window.pageYOffset;
@@ -60,13 +67,13 @@ const Navbar = () => {
                 <div className='flex items-center space-x-4'>
                 {user ? (
                     <>
-                        <Link to="/profile" className='font-semibold text-gray-700 hover:text-slate-800'>Hi, {user.name}!</Link>
-                        <button onClick={logout} className='text-gray-600 hover:font-bold'>Logout</button>
+                        <Link to="/profile" className='font-semibold text-gray-700 hover:text-slate-800'>Hi, {user.username}!</Link>
+                        <button onClick={handleLogout} className='text-gray-600 hover:font-bold'>Logout</button>
                     </>
                 ) : (
                     <>
-                        <Link to="/login" className='text-gray-600 hover:font-bold'>Sign In</Link>
-                        <Link to="/register" className='text-white bg-slate-800 px-5 py-2 rounded-lg hover:bg-slate-700'>Sign Up</Link>
+                        <Link to="/login" className='text-gray-600 hover:font-bold'>Login</Link>
+                        <Link to="/register" className='text-white bg-slate-800 px-5 py-2 rounded-lg border hover:bg-transparent hover:text-gray-600'>Register</Link>
                     </>
                 )}
                 </div>
