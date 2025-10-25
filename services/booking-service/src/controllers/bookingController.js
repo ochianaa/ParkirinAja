@@ -249,6 +249,139 @@ exports.getAllBookings = async (req, res) => {
   }
 };
 
+// Memulai proses pembayaran untuk booking tertentu (simplified version)
+exports.startPayment = async (req, res) => {
+  try {
+    const bookingId = Number(req.params.bookingId);
+
+    // Find the booking
+    const result = await db
+      .select()
+      .from(bookings)
+      .where(eq(bookings.booking_id, bookingId));
+
+    if (result.length === 0) {
+      return res.status(404).json({ message: "Booking not found" });
+    }
+
+    const booking = result[0];
+
+    // Check if user owns this booking
+    if (req.user && booking.user_id !== req.user.id) {
+      return res.status(403).json({ message: "Access denied" });
+    }
+
+    // Update payment status to processing
+    const [updated] = await db
+      .update(bookings)
+      .set({
+        payment_status: 'processing',
+        updated_at: new Date(),
+      })
+      .where(eq(bookings.booking_id, bookingId))
+      .returning('*');
+
+    res.status(200).json({
+      message: "Payment process started (simplified version)",
+      data: updated,
+      note: "This is a simplified implementation. Payment gateway integration skipped."
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Memberikan rating & review setelah sewa selesai (simplified version)
+exports.addReview = async (req, res) => {
+  try {
+    const bookingId = Number(req.params.bookingId);
+    const { rating, review_text } = req.body;
+
+    if (!rating || rating < 1 || rating > 5) {
+      return res.status(400).json({ message: "Rating must be between 1 and 5" });
+    }
+
+    // Find the booking
+    const result = await db
+      .select()
+      .from(bookings)
+      .where(eq(bookings.booking_id, bookingId));
+
+    if (result.length === 0) {
+      return res.status(404).json({ message: "Booking not found" });
+    }
+
+    const booking = result[0];
+
+    // Check if user owns this booking
+    if (req.user && booking.user_id !== req.user.id) {
+      return res.status(403).json({ message: "Access denied" });
+    }
+
+    // For now, just return success (reviews table not implemented yet)
+    res.status(200).json({
+      message: "Review added successfully (simplified version)",
+      data: {
+        booking_id: bookingId,
+        rating,
+        review_text,
+        created_at: new Date()
+      },
+      note: "This is a simplified implementation. Reviews table not implemented yet."
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Mendapatkan ringkasan pendapatan owner (simplified version)
+exports.getOwnerIncome = async (req, res) => {
+  try {
+    const ownerId = req.user?.id;
+
+    // For now, return all paid bookings (garage ownership not implemented yet)
+    const paidBookings = await db
+      .select()
+      .from(bookings)
+      .where(eq(bookings.payment_status, 'paid'));
+
+    const totalIncome = paidBookings.reduce((acc, booking) => acc + Number(booking.total_price), 0);
+
+    res.status(200).json({
+      message: "Owner income fetched successfully (simplified version)",
+      data: {
+        total_income: totalIncome,
+        total_bookings: paidBookings.length,
+        period: "all_time"
+      },
+      note: "This is a simplified implementation. Garage ownership filtering not implemented yet."
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Mendapatkan riwayat detail transaksi owner (simplified version)
+exports.getOwnerTransactions = async (req, res) => {
+  try {
+    const ownerId = req.user?.id;
+
+    // For now, return all paid bookings (garage ownership not implemented yet)
+    const transactions = await db
+      .select()
+      .from(bookings)
+      .where(eq(bookings.payment_status, 'paid'));
+
+    res.status(200).json({
+      message: "Owner transactions fetched successfully (simplified version)",
+      data: transactions,
+      note: "This is a simplified implementation. Garage ownership filtering not implemented yet."
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 // Mendapatkan data analitik keseluruhan
 exports.getAnalyticsSummary = async (req, res) => {
   try {
@@ -268,3 +401,4 @@ exports.getAnalyticsSummary = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+

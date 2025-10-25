@@ -3,11 +3,14 @@ const roleMiddleware = (...allowedRoles) => {
     try {
       const user = req.user;
 
-      if (!user || !user.role) {
+      if (!user || !user.roles) {
         return res.status(401).json({ message: "Unauthorized: user not found" });
       }
 
-      if (!allowedRoles.includes(user.role)) {
+      // Check if user has any of the allowed roles
+      const hasAllowedRole = user.roles.some(role => allowedRoles.includes(role));
+      
+      if (!hasAllowedRole) {
         return res.status(403).json({ message: "Forbidden: access denied" });
       }
 
