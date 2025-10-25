@@ -12,7 +12,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Routes utama
-app.use('/bookings', bookingRoutes);
+app.use('/', bookingRoutes);
 
 // Default route for booking service 
 app.get('/', (req, res) => {

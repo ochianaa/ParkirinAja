@@ -7,7 +7,7 @@ const { eq } = require('drizzle-orm');
 exports.createBooking = async (req, res) => {
   try {
     // Ambil user ID dari JWT (jika ada), atau fallback ke body
-    const userId = req.user?.id || req.body.user_id;
+    const userId = req.user?.userId || req.body.user_id;
     const { garage_id, start_time, end_time, total_price, notes } = req.body;
 
     // Validasi input agar semua kolom wajib terisi
@@ -30,7 +30,7 @@ exports.createBooking = async (req, res) => {
         created_at: new Date(),
         updated_at: new Date(),
       })
-      .returning('*'); // mengembalikan data yang baru dibuat
+      .returning(); // mengembalikan data yang baru dibuat
 
     // Kirim respon sukses
     res.status(201).json({
@@ -46,7 +46,7 @@ exports.createBooking = async (req, res) => {
 // Mendapatkan semua booking milik penyewa
 exports.getMyBookings = async (req, res) => {
   try {
-    const userId = req.user?.id || req.query.user_id;
+    const userId = req.user?.userId || req.query.user_id;
 
     if (!userId) {
       return res.status(400).json({ message: "User ID is required" });
@@ -83,7 +83,7 @@ exports.getMyBookingById = async (req, res) => {
     const booking = result[0];
 
     // Cek otorisasi: hanya user pemilik booking yang boleh lihat
-    if (req.user && booking.user_id !== req.user.id) {
+    if (req.user && booking.user_id !== req.user.userId) {
       return res.status(403).json({ message: "Access denied" });
     }
 
@@ -105,7 +105,7 @@ exports.cancelBooking = async (req, res) => {
         updated_at: new Date(),
       })
       .where(eq(bookings.booking_id, bookingId))
-      .returning('*');
+      .returning();
 
     if (!updated)
       return res.status(404).json({ message: "Booking not found" });
@@ -150,7 +150,7 @@ exports.confirmBooking = async (req, res) => {
         updated_at: new Date(),
       })
       .where(eq(bookings.booking_id, bookingId))
-      .returning('*');
+      .returning();
 
     if (!updated)
       return res.status(404).json({ message: "Booking not found" });
@@ -176,7 +176,7 @@ exports.rejectBooking = async (req, res) => {
         updated_at: new Date(),
       })
       .where(eq(bookings.booking_id, bookingId))
-      .returning('*');
+      .returning();
 
     if (!updated)
       return res.status(404).json({ message: "Booking not found" });
@@ -219,7 +219,7 @@ exports.handlePaymentWebhook = async (req, res) => {
         updated_at: new Date(),
       })
       .where(eq(bookings.booking_id, Number(booking_id)))
-      .returning('*');
+      .returning();
 
     if (!updated)
       return res.status(404).json({ message: "Booking not found" });
@@ -267,7 +267,7 @@ exports.startPayment = async (req, res) => {
     const booking = result[0];
 
     // Check if user owns this booking
-    if (req.user && booking.user_id !== req.user.id) {
+    if (req.user && booking.user_id !== req.user.userId) {
       return res.status(403).json({ message: "Access denied" });
     }
 
@@ -279,7 +279,7 @@ exports.startPayment = async (req, res) => {
         updated_at: new Date(),
       })
       .where(eq(bookings.booking_id, bookingId))
-      .returning('*');
+      .returning();
 
     res.status(200).json({
       message: "Payment process started (simplified version)",
@@ -314,7 +314,7 @@ exports.addReview = async (req, res) => {
     const booking = result[0];
 
     // Check if user owns this booking
-    if (req.user && booking.user_id !== req.user.id) {
+    if (req.user && booking.user_id !== req.user.userId) {
       return res.status(403).json({ message: "Access denied" });
     }
 
@@ -401,4 +401,3 @@ exports.getAnalyticsSummary = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-
