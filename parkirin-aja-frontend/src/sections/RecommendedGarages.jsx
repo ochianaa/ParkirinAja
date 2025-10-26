@@ -68,7 +68,7 @@ const RecommendedGarages = ({ garagesData, favorites, onToggleFavorite }) => {
                   <p className="text-xl text-gray-800 mb-15">Discover top-rated garage spaces in popular locations</p>
 
                   <div className="flex flex-wrap justify-center gap-8">
-                      {garagesData.slice(0, 3).map(garage => (
+                      {garagesData.filter(garage => garage.status !== 'rejected').slice(0, 3).map(garage => (
                           <Card key={garage.garage_id} 
                             garage={garage}
                             isFavorited={favorites.includes(garage.garage_id)}

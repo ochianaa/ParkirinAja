@@ -75,6 +75,7 @@ const GarageManagementPage = () => {
                                     <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
                                         garage.status === 'approved' ? 'bg-green-100 text-green-800' :
                                         garage.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                                        garage.status === 'featured' ? 'bg-purple-100 text-purple-800' :
                                         garage.status === 'available' ? 'bg-blue-100 text-blue-800' :
                                         'bg-red-100 text-red-800'
                                     }`}>
@@ -82,8 +83,9 @@ const GarageManagementPage = () => {
                                     </span>
                                 </td>
                                 <td className="p-4 flex gap-2">
-                                    <button onClick={() => handleUpdateStatus(garage.garage_id, 'available')} className="text-sm font-semibold text-blue-600 hover:underline disabled:text-gray-400" disabled={garage.status === 'available'}>Set Available</button>
-                                    <button onClick={() => handleUpdateStatus(garage.garage_id, 'unavailable')} className="text-sm font-semibold text-orange-600 hover:underline disabled:text-gray-400" disabled={garage.status === 'unavailable'}>Set Unavailable</button>
+                                    <button onClick={() => handleUpdateStatus(garage.garage_id, 'approved')} className="text-sm font-semibold text-green-600 hover:underline disabled:text-gray-400" disabled={garage.status === 'approved'}>Approve</button>
+                                    <button onClick={() => handleUpdateStatus(garage.garage_id, 'rejected')} className="text-sm font-semibold text-red-600 hover:underline disabled:text-gray-400" disabled={garage.status === 'rejected'}>Reject</button>
+                                    <button onClick={() => handleUpdateStatus(garage.garage_id, 'featured')} className="text-sm font-semibold text-purple-600 hover:underline disabled:text-gray-400" disabled={garage.status === 'featured'}>Feature</button>
                                 </td>
                             </tr>
                         ))}

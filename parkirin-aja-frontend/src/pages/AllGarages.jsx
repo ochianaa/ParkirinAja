@@ -62,7 +62,7 @@ const AllGaragesPage = () => {
                 </div>
 
                 <div className="flex flex-wrap justify-center gap-8">
-                    {garages.map(garage => (
+                    {garages.filter(garage => garage.status !== 'rejected').map(garage => (
                         <Card 
                             key={garage.garage_id}
                             garage={garage}
