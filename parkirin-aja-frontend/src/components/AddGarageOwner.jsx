@@ -84,8 +84,8 @@ const AddGarageOwner = ({ isOpen, onClose }) => {
                                 <textarea rows="4" placeholder="Describe your garage..." className="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-3"></textarea>
                             </div>
                             <div>
-                                <label className="block text-sm text-left font-medium text-gray-700">Price per Month (Rp)</label>
-                                <input type="number" placeholder="e.g., 500000" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-3" />
+                                <label className="block text-sm text-left font-medium text-gray-700">Price per Hour (Rp)</label>
+                                <input type="number" placeholder="e.g., 50000" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-3" />
                             </div>
                         </div>
                     </div>
