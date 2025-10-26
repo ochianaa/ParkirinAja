@@ -20,12 +20,17 @@ const getAllGarages = () => {
   return apiClient.get('/garages');
 };
 
+const getGarageById = (garageId) => {
+  return apiClient.get(`/garages/${garageId}`);
+};
+
 const garageService = {
   createGarage,
   getMyGarages,
   updateGarage,
   deleteGarage,
-  getAllGarages
+  getAllGarages,
+  getGarageById
 };
 
 export default garageService;

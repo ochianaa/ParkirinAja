@@ -2,6 +2,7 @@ import { FaCalendarAlt, FaTag, FaCheckCircle, FaTimesCircle, FaHourglassHalf } f
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import bookingService from '../api/BookingService';
+import garageService from '../api/GarageService';
 
 const getStatusInfo = (status) => {
     switch (status) {
@@ -25,8 +26,29 @@ const MyBookingPage = () => {
     useEffect(() => {
         const fetchBookings = async () => {
             try {
-                const response = await bookingService.getMyBookings();
-                setBookings(response.data.data);
+                // Ambil data booking dan data semua garasi secara bersamaan
+                const [bookingsResponse, garagesResponse] = await Promise.all([
+                    bookingService.getMyBookings(),
+                    garageService.getAllGarages() 
+                ]);
+
+                const myBookings = bookingsResponse.data.data || [];
+                const allGarages = garagesResponse.data || [];
+
+                // Buat pemetaan dari garage_id ke detail garasi untuk pencarian cepat
+                const garagesMap = allGarages.reduce((acc, garage) => {
+                    acc[garage.garage_id] = garage;
+                    return acc;
+                }, {});
+
+                // Gabungkan data booking dengan detail garasi
+                const populatedBookings = myBookings.map(booking => ({
+                    ...booking,
+                    garage: garagesMap[booking.garage_id] || { name: 'Garage not found' } 
+                }));
+
+                setBookings(populatedBookings);
+
             } catch (err) {
                 setError('Failed to fetch your bookings. Please try again later.');
                 console.error(err);
@@ -57,10 +79,10 @@ const MyBookingPage = () => {
                             {bookings.map((booking) => {
                                 const statusInfo = getStatusInfo(booking.status);
                                 return (
-                                    <Link to={`/my-bookings/${booking.booking_id}`} key={booking.booking_id} className="block">
+                                    <Link to={`/mybookings/${booking.booking_id}`} key={booking.booking_id} className="block">
                                         <div className="bg-slate-800 text-white p-6 pl-8 pr-8 rounded-lg shadow-lg shadow-black/50 flex flex-col sm:flex-row justify-between items-start sm:items-center">
                                             <div>
-                                                <h3 className="text-xl font-bold text-white">booking.garage.name</h3>
+                                                <h3 className="text-xl font-bold text-white">{booking.garage.name}</h3>
                                                 <div className="flex items-center gap-4 text-sm text-gray-300 mt-2 pl-5">
                                                     <span className="flex items-center gap-2"><FaCalendarAlt /> {new Date(booking.start_time).toLocaleDateString()}</span>
                                                     <span className="flex items-center gap-2"><FaTag /> Rp {Number(booking.total_price).toLocaleString('id-ID')}</span>

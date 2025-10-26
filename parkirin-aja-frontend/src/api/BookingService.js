@@ -8,9 +8,14 @@ const getMyBookings = () => {
   return apiClient.get('/bookings/renter/my-bookings');
 };
 
+const getMyBookingById = (bookingId) => {
+  return apiClient.get(`/bookings/renter/my-bookings/${bookingId}`);
+};
+
 const bookingService = {
   createBooking,
-  getMyBookings
+  getMyBookings,
+  getMyBookingById
 };
 
 export default bookingService;
