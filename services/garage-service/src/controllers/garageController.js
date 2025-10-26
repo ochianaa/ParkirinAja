@@ -1,4 +1,5 @@
 
+
 const Garage = require("../models/garageModel.js");
 const { db, favorites, garages } = require("../db");
 const { eq, and } = require("drizzle-orm");
@@ -39,7 +40,18 @@ const createGarage = async (req, res) => {
   try {
     const ownerId = req.user?.userId ?? req.user?.id;
     if (!ownerId) return res.status(401).json({ error: "Unauthorized" });
-    const newGarage = await Garage.create({ ...req.body, owner_id: ownerId });
+    
+    // Map camelCase to snake_case for database
+    const garageData = {
+      owner_id: ownerId,
+      name: req.body.name,
+      address: req.body.address,
+      description: req.body.description,
+      price_per_hour: req.body.pricePerHour,
+      status: req.body.status || 'available'
+    };
+    
+    const newGarage = await Garage.create(garageData);
     res.status(201).json(newGarage);
   } catch (err) {
     res.status(400).json({ error: err.message });
@@ -68,7 +80,16 @@ const updateGarage = async (req, res) => {
     const garage = await Garage.findByPk(idNum);
     if (!garage || garage.owner_id !== ownerId)
       return res.status(403).json({ message: "Unauthorized" });
-    const updated = await Garage.update(idNum, req.body);
+    
+    // Map camelCase to snake_case for database
+    const updateData = {};
+    if (req.body.name !== undefined) updateData.name = req.body.name;
+    if (req.body.address !== undefined) updateData.address = req.body.address;
+    if (req.body.description !== undefined) updateData.description = req.body.description;
+    if (req.body.pricePerHour !== undefined) updateData.price_per_hour = req.body.pricePerHour;
+    if (req.body.status !== undefined) updateData.status = req.body.status;
+    
+    const updated = await Garage.update(idNum, updateData);
     res.json(updated);
   } catch (err) {
     res.status(400).json({ error: err.message });

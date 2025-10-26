@@ -1,7 +1,7 @@
 
 const jwt = require("jsonwebtoken");
 
-const authenticate = (req, res, next) => {
+const authMiddleware = (req, res, next) => {
   try {
     const authHeader = req.headers["authorization"];
     if (!authHeader) {
@@ -20,9 +20,9 @@ const authenticate = (req, res, next) => {
       });
     }
 
-    // Verifikasi token
+    // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded; // Simpan data user ke request object
+    req.user = decoded; // Attach user payload
 
     next();
   } catch (error) {
@@ -34,4 +34,4 @@ const authenticate = (req, res, next) => {
   }
 };
 
-module.exports = { authenticate };
+module.exports = { authMiddleware };
