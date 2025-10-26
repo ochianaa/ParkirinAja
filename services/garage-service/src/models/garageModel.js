@@ -1,16 +1,44 @@
-import { DataTypes } from "sequelize";
-import sequelize from "../config/database.js";
 
-const Garage = sequelize.define("Garage", {
-  garage_id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-  owner_id: { type: DataTypes.INTEGER, allowNull: false },
-  name: { type: DataTypes.STRING, allowNull: false },
-  address: { type: DataTypes.TEXT, allowNull: false },
-  description: { type: DataTypes.TEXT },
-  price_per_hour: { type: DataTypes.DECIMAL, allowNull: false },
-  status: { type: DataTypes.STRING, defaultValue: "pending" }, // available, unavailable, pending
-}, {
-  timestamps: true,
-});
+const { db, garages } = require('../db');
+const { eq } = require('drizzle-orm');
 
-export default Garage;
+const Garage = {
+  // Find all garages
+  findAll: async () => {
+    return await db.select().from(garages);
+  },
+
+  // Find garage by ID
+  findByPk: async (id) => {
+    const result = await db.select().from(garages).where(eq(garages.garage_id, id));
+    return result[0] || null;
+  },
+
+  // Create new garage
+  create: async (garageData) => {
+    const result = await db.insert(garages).values(garageData).returning();
+    return result[0];
+  },
+
+  // Update garage
+  update: async (id, updateData) => {
+    const result = await db.update(garages)
+      .set({ ...updateData, updated_at: new Date() })
+      .where(eq(garages.garage_id, id))
+      .returning();
+    return result[0];
+  },
+
+  // Delete garage
+  delete: async (id) => {
+    const result = await db.delete(garages).where(eq(garages.garage_id, id)).returning();
+    return result[0];
+  },
+
+  // Find garages by owner
+  findByOwner: async (ownerId) => {
+    return await db.select().from(garages).where(eq(garages.owner_id, ownerId));
+  }
+};
+
+module.exports = Garage;
