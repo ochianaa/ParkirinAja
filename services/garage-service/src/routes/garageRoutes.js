@@ -1,11 +1,12 @@
 
 
+
 const express = require('express');
 const { body } = require('express-validator');
 const garageController = require('../controllers/garageController');
 
 // Middlewares (aligned names)
-const { authenticate } = require('../middleware/authMiddleware');
+const { authMiddleware: authenticate } = require('../middleware/authMiddleware');
 const { adminMiddleware } = require('../middleware/adminMiddleware');
 const { ownerMiddleware } = require('../middleware/ownerMiddleware');
 const { renterMiddleware } = require('../middleware/renterMiddleware');
@@ -56,31 +57,19 @@ const validateAdminStatus = (req, res, next) => {
 };
 
 /* ---------------------------------------------
-   ROUTES - PUBLIC
+   ROUTES - PUBLIC (Publik)
 ----------------------------------------------*/
-// GET /garages - Get all garages (public)
-router.get('/garages', garageController.getAllGarages);
-
-// GET /garages/:id - Get detail of a garage (public)
-router.get('/garages/:id', garageController.getGarageById);
-
-// Optional: reviews stub
-router.get('/garages/:id/reviews', garageController.getGarageReviews);
+// GET / - Get all garages
+router.get('/', garageController.getAllGarages);
 
 /* ---------------------------------------------
    ROUTES - OWNER (Pemilik)
 ----------------------------------------------*/
-// POST /garages - Add new garage
-router.post('/garages', authenticate, ownerMiddleware, validateGarage, garageController.createGarage);
+// POST / - Create a new garage
+router.post('/', authenticate, ownerMiddleware, validateGarage, garageController.createGarage);
 
-// GET /owner/my-garages - Get list of owner's garages
+// GET /owner/my-garages - Get garages owned by the authenticated user
 router.get('/owner/my-garages', authenticate, ownerMiddleware, garageController.getMyGarages);
-
-// PUT /garages/:id - Update garage details
-router.put('/garages/:id', authenticate, ownerMiddleware, validateGarage, garageController.updateGarage);
-
-// DELETE /garages/:id - Delete a garage
-router.delete('/garages/:id', authenticate, ownerMiddleware, garageController.deleteGarage);
 
 /* ---------------------------------------------
    ROUTES - RENTER (Penyewa)
@@ -93,6 +82,21 @@ router.post('/favorites', authenticate, renterMiddleware, validateFavoritePayloa
 
 // DELETE /favorites/:garageId - Remove a garage from favorites
 router.delete('/favorites/:garageId', authenticate, renterMiddleware, garageController.removeFavorite);
+
+/* ---------------------------------------------
+   ROUTES - PUBLIC (Publik) - Parameterized routes (must come after specific routes)
+----------------------------------------------*/
+// GET /:id - Get garage by ID
+router.get('/:id', garageController.getGarageById);
+
+// GET /:id/reviews - Get reviews for a garage
+router.get('/:id/reviews', garageController.getGarageReviews);
+
+// PUT /:id - Update a garage
+router.put('/:id', authenticate, ownerMiddleware, validateGarage, garageController.updateGarage);
+
+// DELETE /:id - Delete a garage
+router.delete('/:id', authenticate, ownerMiddleware, garageController.deleteGarage);
 
 /* ---------------------------------------------
    ROUTES - ADMIN
