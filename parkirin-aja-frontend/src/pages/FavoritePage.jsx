@@ -5,7 +5,7 @@ const FavoritesPage = ({ garagesData, favorites, onToggleFavorite }) => {
   const favoritedGarages = garagesData.filter(garage => favorites.includes(garage.garage_id))
 
   return (
-    <section id="favorites" className="bg-white py-8">
+    <section id="favorites" className="bg-slate-100 py-15 min-h-screen">
       <div className="container mx-auto px-6 text-center">
         <h1 className="text-3xl font-bold text-slate-800 mb-15">Your Favorite Garages</h1>
         

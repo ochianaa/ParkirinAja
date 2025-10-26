@@ -6,7 +6,7 @@ const OwnerGarageCard = ({ garage, onDelete }) => {
 
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    const { image, name, status, price_per_hour } = garage;
+    const { image, name, status, address, price_per_hour } = garage;
 
     const statusColor = status === 'available' ? 'text-green-600' : 'text-red-600';
 
@@ -20,8 +20,11 @@ const OwnerGarageCard = ({ garage, onDelete }) => {
                 </div>
 
                 <div className="p-5">
-                    <div className="mb-2 cursor-pointer">
+                    <div className="cursor-pointer">
                         <h3 className="text-lg font-bold text-gray-800">{name}</h3>
+                    </div>
+                    <div className='mb-3'>
+                        <p className='text-sm font-normal text-gray-700'>Jalan Tukad Batanghari IX No.2</p>
                     </div>
                     <div>
                         <p className={`text-sm font-semibold capitalize ${statusColor}`}>{status}</p>

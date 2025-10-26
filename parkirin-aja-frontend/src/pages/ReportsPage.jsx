@@ -4,26 +4,17 @@ import { FaStar } from "react-icons/fa";
 const ReportsPage = ({ dummyTransactions }) => {
     return (
         <div className="min-h-screen bg-slate-100 py-15 px-35">
-            <h1 className="text-3xl font-bold text-slate-800 mb-8">Reports</h1>
+            <h1 className="text-3xl font-bold text-slate-800 mb-10">Reports</h1>
             
             {/* --- Ringkasan Laporan --- */}
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-15">
-                <div className="rounded-lg border shadow-lg shadow-black/50 bg-slate-800 text-gray-300 p-6">
-                    <h3 className="text-sm font-medium">Total Revenue</h3>
-                    <p className="text-3xl font-bold text-white mt-2">Rp 35.000.000</p>
-                </div>
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2 mb-15">
                 <div className="rounded-lg border shadow-lg shadow-black/50 bg-slate-800 text-gray-300 p-6">
                     <h3 className="text-sm font-medium">Completed Bookings</h3>
                     <p className="text-3xl font-bold text-white mt-2">25</p>
                 </div>
                 <div className="rounded-lg border shadow-lg shadow-black/50 bg-slate-800 text-gray-300 p-6">
-                    <div>
-                         <h3 className="text-sm font-medium">Rating</h3>
-                    </div>
-                    <div className="flex justify-center items-center gap-2 text-sm mt-2">
-                        <span className="font-bold text-3xl text-white">0.0</span>
-                        <FaStar className="text-yellow-400 h-7 w-7" />
-                    </div>
+                    <h3 className="text-sm font-medium">Total Revenue</h3>
+                    <p className="text-3xl font-bold text-white mt-2">Rp 35.000.000</p>
                 </div>
             </div>
 

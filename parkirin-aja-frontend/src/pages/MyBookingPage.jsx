@@ -58,10 +58,10 @@ const MyBookingPage = () => {
                                 const statusInfo = getStatusInfo(booking.status);
                                 return (
                                     <Link to={`/my-bookings/${booking.booking_id}`} key={booking.booking_id} className="block">
-                                        <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow flex flex-col sm:flex-row justify-between items-start sm:items-center">
+                                        <div className="bg-slate-800 text-white p-6 pl-8 pr-8 rounded-lg shadow-lg shadow-black/50 flex flex-col sm:flex-row justify-between items-start sm:items-center">
                                             <div>
-                                                <h3 className="text-xl font-bold text-slate-800">{booking.garage.name}</h3>
-                                                <div className="flex items-center gap-4 text-sm text-gray-500 mt-2">
+                                                <h3 className="text-xl font-bold text-white">booking.garage.name</h3>
+                                                <div className="flex items-center gap-4 text-sm text-gray-300 mt-2 pl-5">
                                                     <span className="flex items-center gap-2"><FaCalendarAlt /> {new Date(booking.start_time).toLocaleDateString()}</span>
                                                     <span className="flex items-center gap-2"><FaTag /> Rp {Number(booking.total_price).toLocaleString('id-ID')}</span>
                                                 </div>
