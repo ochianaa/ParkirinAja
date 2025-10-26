@@ -59,6 +59,8 @@ services:
   booking-service:
     build: ./services/booking-service
     container_name: booking-service
+    ports: 
+      - "3003:3003"
     restart: unless-stopped
     depends_on:
       - postgres-db
@@ -71,6 +73,7 @@ services:
       - PORT=3003
       - GARAGE_SERVICE_URL=http://garage-service:3002
       - AUTH_SERVICE_URL=http://auth-service:3001
+      - JWT_SECRET=${JWT_SECRET}
     expose:
       - "3003"
     
@@ -96,3 +99,5 @@ services:
 
 volumes:
   postgres_data:
+
+  
