@@ -7,6 +7,11 @@ const BookingPopUp = ({ isOpen, onClose, garage, onSubmit }) => {
     const [notes, setNotes] = useState('');
     const [totalPrice, setTotalPrice] = useState(0);
 
+    // Dapatkan tanggal dan waktu saat ini dalam format yang benar untuk atribut min
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+    const minDateTime = now.toISOString().slice(0, 16);
+
     // Hitung total harga secara otomatis saat waktu berubah
     useEffect(() => {
         if (startTime && endTime && garage) {
@@ -59,11 +64,11 @@ const BookingPopUp = ({ isOpen, onClose, garage, onSubmit }) => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm text-left font-medium text-gray-700">Start Time</label>
-                            <input type="datetime-local" value={startTime} onChange={(e) => setStartTime(e.target.value)} required className="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-3" />
+                            <input type="datetime-local" value={startTime} onChange={(e) => setStartTime(e.target.value)} required className="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-3" min={minDateTime} />
                         </div>
                         <div>
                             <label className="block text-sm text-left font-medium text-gray-700">End Time</label>
-                            <input type="datetime-local" value={endTime} onChange={(e) => setEndTime(e.target.value)} required className="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-3" />
+                            <input type="datetime-local" value={endTime} onChange={(e) => setEndTime(e.target.value)} required className="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-3" min={startTime || minDateTime} />
                         </div>
                     </div>
                     <div>
