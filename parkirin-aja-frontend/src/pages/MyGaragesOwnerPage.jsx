@@ -28,7 +28,7 @@ const MyGaragesPage = ({ garagesData }) => {
                         </button>
                     </div>
 
-                    <div className="grid gap-6 md:grid-cols-3">
+                    <div className="grid gap-2 md:grid-cols-3">
                         {garagesData.map((garage) => (
                             <OwnerGarageCard 
                                 key={garage.garage_id}
