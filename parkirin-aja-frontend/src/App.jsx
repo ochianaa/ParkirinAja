@@ -50,9 +50,9 @@ const garagesData = [
 ];
 
 const dummyBookings = [
-    { id: 1, garageName: 'Garasi Aman Downtown', date: '20 Oct 2025', total: 500000, status: 'completed' },
-    { id: 2, garageName: 'Parkir Ekspres Kuta', date: '25 Oct 2025', total: 1000000, status: 'pending' },
-    { id: 3, garageName: 'Garasi Murah Meriah', date: '15 Sep 2025', total: 800000, status: 'cancelled' },
+    { booking_id: 1, garage: { name: 'Garasi Aman Downtown' },start_time: "2025-10-20T10:00:00.000Z",total_price: "500000.00", status: 'completed' },
+    { booking_id: 2, garage: { name: 'Parkir Ekspres Kuta' },start_time: "2025-10-25T14:00:00.000Z",total_price: "1000000.00", status: 'pending' },
+    { booking_id: 3, garage: { name: 'Garasi Murah Meriah' }, start_time: "2025-09-15T09:00:00.000Z",total_price: "800000.00", status: 'cancelled' },
 ];
 
 const dummyBookingDetails = {

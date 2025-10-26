@@ -1,6 +1,6 @@
 import { FaHeart, FaRegHeart } from 'react-icons/fa'
 
-const Card = ({ garage, isFavorited, onToggleFavorite, onCardClick }) => {
+const Card = ({ garage, isFavorited, onToggleFavorite, onCardClick, onBookNowClick }) => {
     const { garage_id, name, image, address, price_per_hour, status } = garage;
 
     return(
@@ -35,7 +35,7 @@ const Card = ({ garage, isFavorited, onToggleFavorite, onCardClick }) => {
                         Rp {Number(price_per_hour).toLocaleString('id-ID')}
                         <span className="text-sm font-normal text-gray-500">/month</span>
                     </p>
-                    <button className="bg-slate-800 text-white px-5 py-2 rounded-lg font-semibold border hover:bg-transparent hover:text-gray-600"
+                    <button onClick={(e) => {e.stopPropagation(); onBookNowClick(); }} className="bg-slate-800 text-white px-5 py-2 rounded-lg font-semibold border hover:bg-transparent hover:text-gray-600"
                         disabled={status !== 'available'}
                     >
                         Book Now
