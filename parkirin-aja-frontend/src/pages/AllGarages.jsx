@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import garageService from '../api/GarageService';
+import bookingService from '../api/BookingService';
 import Card from '../components/Card';
+import BookingPopUp from '../components/BookingPopUp';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -10,6 +12,9 @@ const AllGaragesPage = () => {
     const [error, setError] = useState(null);
     const { user } = useAuth();
     const navigate = useNavigate();
+
+    const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
+    const [bookingGarage, setBookingGarage] = useState(null);
 
     useEffect(() => {
         const fetchGarages = async () => {
@@ -37,8 +42,20 @@ const AllGaragesPage = () => {
             alert('Only renters can book a garage.');
             return;
         }
-        // Navigate to booking page or open booking modal
-        console.log('Book now for', garage);
+        setBookingGarage(garage);
+        setIsBookingModalOpen(true);
+    };
+
+    const handleConfirmBooking = async (bookingData) => {
+        try {
+            await bookingService.createBooking(bookingData);
+            alert('Booking created successfully!');
+            setIsBookingModalOpen(false);
+            setBookingGarage(null);
+        } catch (err) {
+            alert(`Booking failed: ${err.response?.data?.message || err.message}`);
+            console.error("Booking failed", err);
+        }
     };
 
     if (loading) {
@@ -50,31 +67,40 @@ const AllGaragesPage = () => {
     }
 
     return (
-        <div className="bg-slate-100 px-35 min-h-screen">
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
-                <div className="text-center mb-12">
-                    <h1 className="text-3xl font-bold text-slate-800 sm:text-3xl">
-                        All Garages
-                    </h1>
-                    <p className="mt-4 text-lg text-gray-600">
-                        Find the perfect spot from our entire collection of garages.
-                    </p>
-                </div>
+        <>
+            <div className="bg-slate-100 min-h-screen">
+                <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
+                    <div className="text-center mb-15">
+                        <h1 className="text-3xl font-bold text-slate-800 sm:text-3xl">
+                            All Garages
+                        </h1>
+                        <p className="mt-4 text-lg text-gray-600">
+                            Browse all available garage spaces. Find the perfect spot for you.
+                        </p>
+                    </div>
 
-                <div className="flex flex-wrap justify-center gap-8">
-                    {garages.filter(garage => garage.status !== 'rejected').map(garage => (
-                        <Card 
-                            key={garage.garage_id}
-                            garage={garage}
-                            isFavorited={false} // Placeholder
-                            onToggleFavorite={() => console.log('Toggle favorite')} // Placeholder
-                            onCardClick={() => console.log('Card clicked', garage)} // Placeholder
-                            onBookNowClick={() => handleBookNowClick(garage)}
-                        />
-                    ))}
+                    <div className="flex flex-wrap justify-center gap-8">
+                        {garages.filter(garage => garage.status !== 'rejected').map(garage => (
+                            <Card 
+                                key={garage.garage_id}
+                                garage={garage}
+                                isFavorited={false} // Placeholder
+                                onToggleFavorite={() => console.log('Toggle favorite')} // Placeholder
+                                onCardClick={() => console.log('Card clicked', garage)} // Placeholder
+                                onBookNowClick={() => handleBookNowClick(garage)}
+                            />
+                        ))}
+                    </div>
                 </div>
             </div>
-        </div>
+
+            <BookingPopUp 
+                isOpen={isBookingModalOpen}
+                onClose={() => setIsBookingModalOpen(false)}
+                garage={bookingGarage}
+                onSubmit={handleConfirmBooking}
+            />
+        </>
     );
 };
 

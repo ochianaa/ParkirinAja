@@ -21,7 +21,7 @@ const Card = ({ garage, isFavorited, onToggleFavorite, onCardClick, onBookNowCli
     };
 
     return(
-        <div className="bg-white rounded-xl shadow-lg overflow-hidden w-full max-w-90 hover:scale-110 transition-transform duration-300">
+        <div className="bg-white rounded-xl shadow-lg overflow-hidden w-full max-w-90 hover:scale-105 transition-transform duration-300">
             <div className="relative">
                 <div onClick={onCardClick} className="cursor-pointer">
                     <img className="w-full h-40 object-cover" src={image} alt={name} />
@@ -53,7 +53,7 @@ const Card = ({ garage, isFavorited, onToggleFavorite, onCardClick, onBookNowCli
                         <span className="text-sm font-normal text-gray-500"> /Hour</span>
                     </p>
                     <button onClick={(e) => {e.stopPropagation(); onBookNowClick(); }} className="bg-slate-800 text-white px-5 py-2 rounded-lg font-semibold border hover:bg-transparent hover:text-gray-600"
-                        disabled={status !== 'available'}
+                        disabled={!['available', 'approved', 'featured'].includes(status)}
                     >
                         Book Now
                     </button>
