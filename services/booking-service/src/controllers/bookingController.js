@@ -6,15 +6,15 @@ const validateGarageExists = async (garageId) => {
   try {
     // For development/testing: Skip validation if SKIP_GARAGE_VALIDATION env var is set
     if (process.env.SKIP_GARAGE_VALIDATION === 'true') {
-      console.log(Skipping garage validation for garage_id: ${garageId} (SKIP_GARAGE_VALIDATION=true));
+      console.log(`Skipping garage validation for garage_id: ${garageId} (SKIP_GARAGE_VALIDATION=true)`);
       return { exists: true, garage: { id: garageId, name: 'Mock Garage' } };
     }
 
     // In a microservices architecture, this should call the garage service
     const garageServiceUrl = process.env.GARAGE_SERVICE_URL || 'http://localhost:8080/api/garages';
-    const url = ${garageServiceUrl}/${garageId};
+    const url = `${garageServiceUrl}/${garageId}`;
     
-    console.log(Validating garage existence: ${url});
+    console.log(`Validating garage existence: ${url}`);
     
     const response = await fetch(url, {
       method: 'GET',
@@ -25,17 +25,17 @@ const validateGarageExists = async (garageId) => {
       signal: AbortSignal.timeout(5000), // 5 second timeout
     });
 
-    console.log(Garage validation response: ${response.status} ${response.statusText});
+    console.log(`Garage validation response: ${response.status} ${response.statusText}`);
 
     if (!response.ok) {
       if (response.status === 404) {
         return { exists: false, error: 'Garage not found' };
       }
-      return { exists: false, error: Failed to validate garage (HTTP ${response.status}) };
+      return { exists: false, error: `Failed to validate garage (HTTP ${response.status})` };
     }
 
     const garage = await response.json();
-    console.log(Garage validation successful for garage_id: ${garageId});
+    console.log(`Garage validation successful for garage_id: ${garageId}`);
     return { exists: true, garage };
   } catch (error) {
     console.error('Error validating garage:', error.message);
@@ -51,7 +51,7 @@ const validateGarageExists = async (garageId) => {
       return { exists: false, error: 'Garage service host not found' };
     }
     
-    return { exists: false, error: Garage service unavailable: ${error.message} };
+    return { exists: false, error: `Garage service unavailable: ${error.message}` };
   }
 };
 
@@ -479,6 +479,6 @@ exports.getAnalyticsSummary = async (req, res) => {
       summary: { totalBookings, totalRevenue },
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+    res.status(500).json({ error: error.message });
+  }
 };
