@@ -33,7 +33,7 @@ const Card = ({ garage, isFavorited, onToggleFavorite, onCardClick, onBookNowCli
                 <div className="flex justify-between items-center mt-4">
                     <p className="text-lg font-bold text-gray-900">
                         Rp {Number(price_per_hour).toLocaleString('id-ID')}
-                        <span className="text-sm font-normal text-gray-500">/month</span>
+                        <span className="text-sm font-normal text-gray-500"> /Hour</span>
                     </p>
                     <button onClick={(e) => {e.stopPropagation(); onBookNowClick(); }} className="bg-slate-800 text-white px-5 py-2 rounded-lg font-semibold border hover:bg-transparent hover:text-gray-600"
                         disabled={status !== 'available'}

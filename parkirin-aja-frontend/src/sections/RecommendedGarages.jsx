@@ -68,7 +68,7 @@ const RecommendedGarages = ({ garagesData, favorites, onToggleFavorite }) => {
                   <p className="text-xl text-gray-800 mb-15">Discover top-rated garage spaces in popular locations</p>
 
                   <div className="flex flex-wrap justify-center gap-8">
-                      {garagesData.map(garage => (
+                      {garagesData.slice(0, 3).map(garage => (
                           <Card key={garage.garage_id} 
                             garage={garage}
                             isFavorited={favorites.includes(garage.garage_id)}
@@ -77,6 +77,11 @@ const RecommendedGarages = ({ garagesData, favorites, onToggleFavorite }) => {
                             onBookNowClick={() => handleOpenBookingModal(garage)}
                           />
                       ))}
+                  </div>
+                  <div>
+                    <button onClick={() => navigate('/all-garages')} className="bg-slate-800 text-white px-5 py-2 rounded-lg font-semibold border hover:bg-transparent hover:text-gray-600 mt-10">
+                        See More
+                    </button>
                   </div>
               </div>
           </section>

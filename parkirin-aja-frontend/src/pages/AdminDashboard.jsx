@@ -1,22 +1,30 @@
 import AdminService from "../api/AdminService";
+import garageService from "../api/GarageService";
 import { useEffect, useState } from "react";
 
 const AdminDashboard = () => {
 
     const [totalUsers, setTotalUsers] = useState(0);
+    const [totalGarages, setTotalGarages] = useState(0);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     useEffect(() => {
         const fetchAnalytics = async () => {
             try {
-                const response = await AdminService.getAllUsers();
+                const [userResponse, garageResponse] = await Promise.all([
+                    AdminService.getAllUsers(),
+                    garageService.getAllGarages()
+                ]);
 
-                const userCount = response.data.data.users.length;
+                const userCount = userResponse.data.data.users.length;
                 setTotalUsers(userCount);
 
+                const garageCount = garageResponse.data.length;
+                setTotalGarages(garageCount);
+
             } catch (err) {
-                setError('Failed to load user data.');
+                setError('Failed to load dashboard data.');
                 console.error(err);
             } finally {
                 setLoading(false);
@@ -45,7 +53,13 @@ const AdminDashboard = () => {
                 </div>
                 <div className="rounded-lg border-1 shadow-lg shadow-black/50 bg-slate-800 text-gray-300 p-6 border-gray-300">
                     <h3 className="text-sm font-medium text-gray-300">Total Garages</h3>
-                    <p className="text-3xl font-bold text-white mt-2">350</p>
+                    {loading ? (
+                        <p className="text-3xl font-bold mt-2 text-gray-300">...</p>
+                    ) : error ? (
+                        <p className="text-sm font-bold mt-2 text-red-500">{error}</p>
+                    ) : (
+                        <p className="text-3xl font-bold text-white mt-2">{totalGarages.toLocaleString()}</p>
+                    )}
                 </div>
                 <div className="rounded-lg border-1 shadow-lg shadow-black/50 bg-slate-800 text-gray-300 p-6 border-gray-300">
                     <h3 className="text-sm font-medium text-gray-300">Total Bookings</h3>

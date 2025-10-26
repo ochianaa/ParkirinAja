@@ -17,6 +17,7 @@ import ReportsPage from './pages/ReportsPage'
 import AdminDashboard from './pages/AdminDashboard'
 import UserManagementPage from './pages/UserManagementPage'
 import GarageManagementPage from './pages/GarageManagementPage'
+import AllGaragesPage from './pages/AllGarages.jsx'
 import ProtectedRoute from './router/ProtectedRoute'
 
 const garagesData = [
@@ -46,6 +47,33 @@ const garagesData = [
     description: 'Pilihan hemat untuk parkir harian di pusat perbelanjaan.',
     price_per_hour: 30000,
     status: 'unavailable',
+  },
+  {
+    garage_id: 4,
+    image: 'https://i.pinimg.com/736x/ba/52/95/ba52956eeeb1db46940bcf15495f1a7d.jpg',
+    name: 'Parkir Ekspres Kuta',
+    address: 'Jl. Pantai Kuta No. 8, Kuta, Bali',
+    description: 'Lokasi strategis dekat pantai, cocok untuk wisatawan.',
+    price_per_hour: 20000,
+    status: 'available',
+  },
+  {
+    garage_id: 5,
+    image: 'https://i.pinimg.com/736x/c0/b8/a8/c0b8a8f6977fccf7b041b06746face56.jpg',
+    name: 'Garasi Murah Meriah',
+    address: 'Jl. Cihampelas No. 160, Bandung',
+    description: 'Pilihan hemat untuk parkir harian di pusat perbelanjaan.',
+    price_per_hour: 30000,
+    status: 'unavailable',
+  },
+  {
+    garage_id: 6,
+    image: 'https://i.pinimg.com/1200x/ae/c4/91/aec491f1daa8ebe64c208ae7264778c0.jpg',
+    name: 'Garasi Aman Downtown',
+    address: 'Jl. Jenderal Sudirman No. 12, Jakarta Pusat',
+    description: 'Garasi indoor yang aman dengan penjagaan 24 jam.',
+    price_per_hour: 15000,
+    status: 'available',
   },
 ];
 
@@ -113,8 +141,9 @@ function App() {
       
       <Routes>
         {/* === Rute Publik (Bisa diakses semua orang) === */}
-        <Route path="/" element={<HomePage garagesData={garagesData} favorites={favorites} onToggleFavorite={handleToggleFavorite} />} />
+        <Route path="/" element={<HomePage favorites={favorites} onToggleFavorite={handleToggleFavorite} />} />
         <Route path="/search" element={<SearchResultsPage garagesData={garagesData} favorites={favorites} onToggleFavorite={handleToggleFavorite} />} />
+        <Route path="/all-garages" element={<AllGaragesPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
 
