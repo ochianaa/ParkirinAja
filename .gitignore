@@ -29,3 +29,5 @@ bun.lockb
 *.sw?
 
 project-bible.md
+complete-flow-test.sh
+bookingtest-scenario.md

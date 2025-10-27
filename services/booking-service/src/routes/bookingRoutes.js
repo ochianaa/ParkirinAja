@@ -13,6 +13,11 @@ router.get('/renter/my-bookings',
 router.get('/renter/my-bookings/:id', authMiddleware, bookingController.getMyBookingById); // Mendapatkan detail satu booking tertentu milik penyewa
 router.post('/:bookingId/cancel', authMiddleware, bookingController.cancelBooking); // Membatalkan booking yang sudah dibuat
 
+// REVIEW ENDPOINTS
+router.get('/reviews/garage/:garageId', bookingController.getGarageReviews); // Mendapatkan semua review untuk garasi tertentu (public)
+router.get('/reviews/user/my-reviews', authMiddleware, bookingController.getUserReviews); // Mendapatkan semua review milik user yang sedang login
+router.get('/reviews/:reviewId', bookingController.getReviewById); // Mendapatkan detail review tertentu (public)
+
 // PEMILIK (OWNER)
 router.get('/owner/requests', 
     authMiddleware, roleMiddleware('owner'), bookingController.getOwnerRequests); // Mendapatkan daftar permintaan booking untuk garasi miliknya
