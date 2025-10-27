@@ -18,6 +18,7 @@ const AdminDashboard = () => {
     const [totalUsers, setTotalUsers] = useState(0);
     const [totalGarages, setTotalGarages] = useState(0);
     const [totalBookings, setTotalBookings] = useState(0);
+    const [totalRevenue, setTotalRevenue] = useState(0);
     const [chartData, setChartData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -25,23 +26,24 @@ const AdminDashboard = () => {
     useEffect(() => {
         const fetchAnalytics = async () => {
             try {
-                const [userResponse, garageResponse, bookingResponse] = await Promise.all([
+                const [userResponse, garageResponse, allBookingsResponse, analyticsResponse] = await Promise.all([
                     AdminService.getAllUsers(),
                     garageService.getAllGarages(),
-                    bookingService.getAllBookingsForAdmin()
+                    bookingService.getAllBookingsForAdmin(), // Still needed for the chart
+                    bookingService.getAdminAnalytics() // For summary cards
                 ]);
 
-                const userCount = userResponse.data.data.users.length;
-                setTotalUsers(userCount);
+                // Set user and garage counts
+                setTotalUsers(userResponse.data.data.users.length);
+                setTotalGarages(garageResponse.data.length);
 
-                const garageCount = garageResponse.data.length;
-                setTotalGarages(garageCount);
+                // Set summary data from analytics endpoint
+                const summary = analyticsResponse.data.summary;
+                setTotalBookings(summary.totalBookings);
+                setTotalRevenue(summary.totalRevenue);
 
-                const bookingCount = bookingResponse.data.data.length;
-                setTotalBookings(bookingCount);
-
-                // Process data for the chart
-                const bookingsByDate = bookingResponse.data.data.reduce((acc, booking) => {
+                // Process all bookings data for the chart
+                const bookingsByDate = allBookingsResponse.data.data.reduce((acc, booking) => {
                     const date = new Date(booking.created_at).toISOString().split('T')[0];
                     acc[date] = (acc[date] || 0) + 1;
                     return acc;
@@ -104,7 +106,13 @@ const AdminDashboard = () => {
                 </div>
                 <div className="rounded-lg border-1 shadow-lg shadow-black/50 bg-slate-800 text-gray-300 p-6 border-gray-300">
                     <h3 className="text-sm font-medium text-gray-300">Total Revenue</h3>
-                    <p className="text-3xl font-bold text-white mt-2">Rp 1.2M</p>
+                    {loading ? (
+                        <p className="text-3xl font-bold mt-2 text-gray-300">...</p>
+                    ) : error ? (
+                        <p className="text-sm font-bold mt-2 text-red-500">{error}</p>
+                    ) : (
+                        <p className="text-3xl font-bold text-white mt-2">Rp {totalRevenue.toLocaleString('id-ID')}</p>
+                    )}
                 </div>
             </div>
 

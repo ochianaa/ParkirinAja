@@ -44,6 +44,10 @@ const getOwnerIncome = () => {
   return apiClient.get('/bookings/owner/reports/income');
 };
 
+const getAdminAnalytics = () => {
+  return apiClient.get('/bookings/admin/analytics');
+};
+
 const bookingService = {
   createBooking,
   getMyBookings,
@@ -55,7 +59,8 @@ const bookingService = {
   getAllBookingsForAdmin,
   startPayment,
   getOwnerTransactions,
-  getOwnerIncome
+  getOwnerIncome,
+  getAdminAnalytics
 };
 
 export default bookingService;

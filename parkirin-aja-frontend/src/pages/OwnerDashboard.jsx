@@ -7,6 +7,7 @@ const OwnerDashboard = () => {
 
     const [pendingCount, setPendingCount] = useState(0);
     const [activeGaragesCount, setActiveGaragesCount] = useState(0);
+    const [totalRevenue, setTotalRevenue] = useState(0);
     const [bookingRequests, setBookingRequests] = useState([]);
     const [showAll, setShowAll] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -15,9 +16,10 @@ const OwnerDashboard = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [bookingResponse, garageResponse] = await Promise.all([
+                const [bookingResponse, garageResponse, incomeResponse] = await Promise.all([
                     bookingService.getBookingRequests(),
-                    garageService.getMyGarages()
+                    garageService.getMyGarages(),
+                    bookingService.getOwnerIncome()
                 ]);
 
                 const bookings = bookingResponse.data.data;
@@ -30,6 +32,8 @@ const OwnerDashboard = () => {
 
                 const activeGarages = garageResponse.data.filter(garage => garage.status !== 'rejected');
                 setActiveGaragesCount(activeGarages.length);
+
+                setTotalRevenue(incomeResponse.data.data.total_income);
 
             } catch (err) {
                 setError('Failed to load data');
@@ -51,8 +55,14 @@ const OwnerDashboard = () => {
             {/* --- Kartu Statistik --- */}
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-8">
                 <div className="rounded-lg border-1 shadow-lg shadow-black/50 bg-slate-800 text-gray-300 p-6 border-gray-300">
-                    <h3 className="text-sm font-medium text-gray-300">Total Revenue (This Month)</h3>
-                    <p className="text-3xl font-bold mt-2">Rp 15.000.000</p>
+                    <h3 className="text-sm font-medium text-gray-300">Total Revenue</h3>
+                    {loading ? (
+                        <p className="text-3xl font-bold mt-2">...</p>
+                    ) : error ? (
+                        <p className="text-sm font-bold mt-2 text-red-500">{error}</p>
+                    ) : (
+                        <p className="text-3xl font-bold mt-2 text-white">Rp {Number(totalRevenue).toLocaleString('id-ID')}</p>
+                    )}
                 </div>
                 <div className="rounded-lg border-1 shadow-lg shadow-black/50 bg-slate-800 text-gray-300 p-6 border-gray-300">
                     <h3 className="text-sm font-medium text-gray-300">Pending Requests</h3>
@@ -61,7 +71,7 @@ const OwnerDashboard = () => {
                     ) : error ? (
                         <p className="text-sm font-bold mt-2 text-red-500">{error}</p>
                     ) : (
-                        <p className="text-3xl font-bold mt-2">{pendingCount}</p>
+                        <p className="text-3xl font-bold mt-2 text-white">{pendingCount}</p>
                     )}
                 </div>
                 <div className="rounded-lg border-1 shadow-lg shadow-black/50 bg-slate-800 text-gray-300 p-6 border-gray-300">
@@ -71,7 +81,7 @@ const OwnerDashboard = () => {
                     ) : error ? (
                         <p className="text-sm font-bold mt-2 text-red-500">{error}</p>
                     ) : (
-                        <p className="text-3xl font-bold mt-2">{activeGaragesCount}</p>
+                        <p className="text-3xl font-bold mt-2 text-white">{activeGaragesCount}</p>
                     )}
                 </div>
             </div>
