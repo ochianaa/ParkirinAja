@@ -1,4 +1,4 @@
-CREATE TABLE "Bookings" (
+CREATE TABLE IF NOT EXISTS "Bookings" (
 	"booking_id" serial PRIMARY KEY NOT NULL,
 	"user_id" integer NOT NULL,
 	"garage_id" integer NOT NULL,

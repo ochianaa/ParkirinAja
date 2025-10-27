@@ -8,7 +8,7 @@ services:
     container_name: parkirinaja-frontend
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "5173:5173"
     depends_on:
       - api-gateway
 
@@ -52,12 +52,15 @@ services:
     environment:
       - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres-db:5432/${POSTGRES_DB}
       - PORT=3002
+      - JWT_SECRET=${JWT_SECRET}
     expose:
       - "3002"
 
   booking-service:
     build: ./services/booking-service
     container_name: booking-service
+    ports: 
+      - "3003:3003"
     restart: unless-stopped
     depends_on:
       - postgres-db
@@ -70,6 +73,7 @@ services:
       - PORT=3003
       - GARAGE_SERVICE_URL=http://garage-service:3002
       - AUTH_SERVICE_URL=http://auth-service:3001
+      - JWT_SECRET=${JWT_SECRET}
     expose:
       - "3003"
     
@@ -95,3 +99,5 @@ services:
 
 volumes:
   postgres_data:
+
+  

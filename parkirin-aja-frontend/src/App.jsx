@@ -17,6 +17,7 @@ import ReportsPage from './pages/ReportsPage'
 import AdminDashboard from './pages/AdminDashboard'
 import UserManagementPage from './pages/UserManagementPage'
 import GarageManagementPage from './pages/GarageManagementPage'
+import AllGaragesPage from './pages/AllGarages.jsx'
 import ProtectedRoute from './router/ProtectedRoute'
 
 const garagesData = [
@@ -26,7 +27,7 @@ const garagesData = [
     name: 'Garasi Aman Downtown',
     address: 'Jl. Jenderal Sudirman No. 12, Jakarta Pusat',
     description: 'Garasi indoor yang aman dengan penjagaan 24 jam.',
-    price_per_hour: 500000,
+    price_per_hour: 15000,
     status: 'available',
   },
   {
@@ -35,7 +36,7 @@ const garagesData = [
     name: 'Parkir Ekspres Kuta',
     address: 'Jl. Pantai Kuta No. 8, Kuta, Bali',
     description: 'Lokasi strategis dekat pantai, cocok untuk wisatawan.',
-    price_per_hour: 1000000,
+    price_per_hour: 20000,
     status: 'available',
   },
   {
@@ -44,15 +45,42 @@ const garagesData = [
     name: 'Garasi Murah Meriah',
     address: 'Jl. Cihampelas No. 160, Bandung',
     description: 'Pilihan hemat untuk parkir harian di pusat perbelanjaan.',
-    price_per_hour: 800000,
+    price_per_hour: 30000,
     status: 'unavailable',
+  },
+  {
+    garage_id: 4,
+    image: 'https://i.pinimg.com/736x/ba/52/95/ba52956eeeb1db46940bcf15495f1a7d.jpg',
+    name: 'Parkir Ekspres Kuta',
+    address: 'Jl. Pantai Kuta No. 8, Kuta, Bali',
+    description: 'Lokasi strategis dekat pantai, cocok untuk wisatawan.',
+    price_per_hour: 20000,
+    status: 'available',
+  },
+  {
+    garage_id: 5,
+    image: 'https://i.pinimg.com/736x/c0/b8/a8/c0b8a8f6977fccf7b041b06746face56.jpg',
+    name: 'Garasi Murah Meriah',
+    address: 'Jl. Cihampelas No. 160, Bandung',
+    description: 'Pilihan hemat untuk parkir harian di pusat perbelanjaan.',
+    price_per_hour: 30000,
+    status: 'unavailable',
+  },
+  {
+    garage_id: 6,
+    image: 'https://i.pinimg.com/1200x/ae/c4/91/aec491f1daa8ebe64c208ae7264778c0.jpg',
+    name: 'Garasi Aman Downtown',
+    address: 'Jl. Jenderal Sudirman No. 12, Jakarta Pusat',
+    description: 'Garasi indoor yang aman dengan penjagaan 24 jam.',
+    price_per_hour: 15000,
+    status: 'available',
   },
 ];
 
 const dummyBookings = [
-    { id: 1, garageName: 'Garasi Aman Downtown', date: '20 Oct 2025', total: 500000, status: 'completed' },
-    { id: 2, garageName: 'Parkir Ekspres Kuta', date: '25 Oct 2025', total: 1000000, status: 'pending' },
-    { id: 3, garageName: 'Garasi Murah Meriah', date: '15 Sep 2025', total: 800000, status: 'cancelled' },
+    { booking_id: 1, garage: { name: 'Garasi Aman Downtown' },start_time: "2025-10-20T10:00:00.000Z",total_price: "500000.00", status: 'completed' },
+    { booking_id: 2, garage: { name: 'Parkir Ekspres Kuta' },start_time: "2025-10-25T14:00:00.000Z",total_price: "1000000.00", status: 'pending' },
+    { booking_id: 3, garage: { name: 'Garasi Murah Meriah' }, start_time: "2025-09-15T09:00:00.000Z",total_price: "800000.00", status: 'cancelled' },
 ];
 
 const dummyBookingDetails = {
@@ -69,9 +97,9 @@ const dummyBookingDetails = {
 };
 
 const dummyRequests = [
-    { id: 1, renterName: 'Budi Santoso', garageName: 'Garasi Aman Downtown', dateRange: '20 Oct - 22 Oct 2025', amount: 500000 },
-    { id: 2, renterName: 'Citra Lestari', garageName: 'Parkir Ekspres Kuta', dateRange: '25 Oct - 26 Oct 2025', amount: 1000000 },
-    { id: 3, renterName: 'Agus Wijaya', garageName: 'Garasi Aman Downtown', dateRange: '01 Nov - 03 Nov 2025', amount: 750000 },
+    { id: 1, renterName: 'Budi Santoso', garageName: 'Garasi Aman Downtown', dateRange: '20 Oct - 22 Oct 2025', amount: 15000 },
+    { id: 2, renterName: 'Citra Lestari', garageName: 'Parkir Ekspres Kuta', dateRange: '25 Oct - 26 Oct 2025', amount: 20000 },
+    { id: 3, renterName: 'Agus Wijaya', garageName: 'Garasi Aman Downtown', dateRange: '01 Nov - 03 Nov 2025', amount: 30000 },
 ];
 
 const dummyTransactions = [
@@ -113,8 +141,9 @@ function App() {
       
       <Routes>
         {/* === Rute Publik (Bisa diakses semua orang) === */}
-        <Route path="/" element={<HomePage garagesData={garagesData} favorites={favorites} onToggleFavorite={handleToggleFavorite} />} />
+        <Route path="/" element={<HomePage favorites={favorites} onToggleFavorite={handleToggleFavorite} />} />
         <Route path="/search" element={<SearchResultsPage garagesData={garagesData} favorites={favorites} onToggleFavorite={handleToggleFavorite} />} />
+        <Route path="/all-garages" element={<AllGaragesPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
 

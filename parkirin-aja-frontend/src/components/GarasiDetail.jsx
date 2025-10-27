@@ -5,14 +5,8 @@ const GarageDetail = ({ garage, onClose, isFavorited, onToggleFavorite }) => {
     if (!garage) return null;
 
     return (
-        <div 
-            onClick={onClose} 
-            className="fixed inset-0 bg-black/30 backdrop-blur-sm flex justify-center items-center z-50"
-        >
-            <div 
-                onClick={(e) => e.stopPropagation()}
-                className="bg-white rounded-xl shadow-lg w-full max-w-2xl relative"
-            >
+        <div onClick={onClose} className="fixed inset-0 bg-black/30 backdrop-blur-sm flex justify-center items-center z-50">
+            <div onClick={(e) => e.stopPropagation()} className="bg-white rounded-xl shadow-lg w-full max-w-2xl relative">
                 {/* Tombol Tutup */}
                 <button onClick={onClose} className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-2xl">&times;</button>
                 
@@ -43,12 +37,6 @@ const GarageDetail = ({ garage, onClose, isFavorited, onToggleFavorite }) => {
                             Rp {Number(garage.price_per_hour).toLocaleString('id-ID')}
                             <span className="text-lg font-normal text-gray-500">/month</span>
                         </p>
-                        <button 
-                            className="bg-slate-800 text-white px-6 py-3 rounded-lg font-semibold border hover:bg-transparent hover:text-gray-800"
-                            disabled={garage.status !== 'available'}
-                        >
-                            Book Now
-                        </button>
                     </div>
                 </div>
             </div>

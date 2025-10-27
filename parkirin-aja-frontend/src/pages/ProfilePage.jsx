@@ -104,7 +104,7 @@ const ProfilePage = () => {
                             ></textarea>
                         </div>
                         
-                        <div className="flex justify-end items-center pt-4 border-t">
+                        <div className="flex justify-end items-center pt-4">
 
                             <div className="flex gap-4">
                                 {isEditing ? (

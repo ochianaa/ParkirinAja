@@ -30,7 +30,7 @@ const Navbar = () => {
                 <div className='hidden md:flex items-center space-x-6'>
                 {/* Link untuk semua orang */}
                     <Link to="/#home" smooth scroll={scrollWithOffset} className='text-gray-600 hover:font-bold'>Home</Link>
-                    <Link to="/#recommendedGarages" smooth scroll={scrollWithOffset} className='text-gray-600 hover:font-bold'>Recommended Garages</Link>
+                    <Link to="/all-garages" className='text-gray-600 hover:font-bold'>All Garages</Link>
                     <Link to="/#howItWorks" smooth scroll={scrollWithOffset} className='text-gray-600 hover:font-bold'>How It Works</Link>
                 
                 {/* Link hanya untuk Renter & yang sudah login */}

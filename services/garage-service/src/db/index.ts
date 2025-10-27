@@ -7,4 +7,4 @@ const pool = new Pool({
 });
 
 export const db = drizzle(pool, { schema });
-export { garages } from './schema';
+export { garages, favorites } from './schema';

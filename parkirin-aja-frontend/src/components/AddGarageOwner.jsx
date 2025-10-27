@@ -1,28 +1,48 @@
 import { useState } from 'react';
-import { FaImage } from 'react-icons/fa';
+import { FaImage } from 'react-icons/fa'; // Ikon untuk placeholder
+import garageService from '../api/GarageService';
 
-const AddGarageOwner = ({ isOpen, onClose }) => {
-    const [selectedFile, setSelectedFile] = useState(null);
-    const [preview, setPreview] = useState(null);
+const AddGarageOwner = ({ isOpen, onClose, onGarageAdded }) => {
+    
+    // State untuk form, tanpa 'ImgURL'
+    const [formData, setFormData] = useState({
+        name: '',
+        address: '',
+        description: '',
+        pricePerHour: '',
+    });
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
 
     if (!isOpen) return null;
 
-    const handleFileChange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            setSelectedFile(file);
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setPreview(reader.result);
-            };
-            reader.readAsDataURL(file);
-        }
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleRemoveImage = () => {
-        setSelectedFile(null);
-        setPreview(null);
-    };
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        setError(null);
+
+        const payload = {
+            ...formData,
+            pricePerHour: Number(formData.pricePerHour),
+            // Anda bisa mengirim URL placeholder default jika backend membutuhkannya
+            // ImgURL: 'https://via.placeholder.com/300x200?text=Garage+Image',
+        };
+
+        try {
+            await garageService.createGarage(payload);
+            onGarageAdded(); 
+            onClose();
+        } catch (err) {
+            setError(err.response?.data?.message || 'Failed to add garage.');
+        } finally {
+            setLoading(false);
+        }
+    }; 
 
     return (
         <div 
@@ -30,7 +50,7 @@ const AddGarageOwner = ({ isOpen, onClose }) => {
             onClick={onClose}
         >
             <div 
-                className="bg-white p-8 rounded-lg shadow-xl w-full max-w-4xl" // Lebarkan modal sedikit
+                className="bg-white p-8 rounded-lg shadow-xl w-full max-w-4xl"
                 onClick={(e) => e.stopPropagation()}
             >
                 <div className="flex justify-between items-center mb-6 border-b pb-4">
@@ -38,64 +58,66 @@ const AddGarageOwner = ({ isOpen, onClose }) => {
                     <button onClick={onClose} className="text-gray-500 hover:text-gray-800 text-2xl">&times;</button>
                 </div>
                 
-                <form>
+                <form onSubmit={handleSubmit}>
                     <div className="flex flex-col md:flex-row gap-8">
 
+                        {/* --- Kolom Kiri (Placeholder Gambar) --- */}
                         <div className="w-full md:w-1/3">
                             <label className="block text-sm text-left font-medium text-gray-700">Garage Photo</label>
-                            <div className="mt-1 flex justify-center items-center p-2 border-2 border-gray-300 border-dashed rounded-md w-full aspect-video">
-                                <div className="space-y-1 text-center flex flex-col justify-center">
-                                    {preview ? (
-                                        <div>
-                                            <img src={preview} alt="Preview" className="mx-auto h-48 w-auto rounded-md object-cover" />
-                                            <button type="button" onClick={handleRemoveImage} className="mt-2 text-sm text-red-600 hover:underline">
-                                                Remove Image
-                                            </button>
-                                        </div>
-                                    ) : (
-                                        <>
-                                            <FaImage className="mx-auto h-12 w-12 text-gray-400" />
-                                            <div className="flex text-sm text-gray-600">
-                                                <label htmlFor="file-upload" className="relative cursor-pointer bg-white rounded-md font-medium text-slate-600 hover:text-slate-500">
-                                                    <span>Upload a file</span>
-                                                    <input id="file-upload" name="file-upload" type="file" className="sr-only" onChange={handleFileChange} accept="image/*" />
-                                                </label>
-                                                <p className="pl-1">or drag and drop</p>
-                                            </div>
-                                            <p className="text-xs text-gray-500">PNG, JPG up to 10MB</p>
-                                        </>
-                                    )}
+                            <div className="mt-1 flex justify-center items-center p-2 border-2 border-gray-300 border-dashed rounded-md w-full aspect-video bg-gray-50">
+                                <div className="text-center text-gray-400">
+                                    <FaImage className="mx-auto h-12 w-12" />
+                                    <p className="mt-2 text-sm">Image will be handled by default</p>
                                 </div>
                             </div>
                         </div>
 
-
+                        {/* --- Kolom Kanan (Detail Garasi) --- */}
                         <div className="w-full md:w-2/3 flex flex-col space-y-6">
                             <div>
-                                <label className="block text-sm text-left font-medium text-gray-700">Garage Name</label>
-                                <input type="text" placeholder="e.g., Garasi Modern Sudirman" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-3" />
+                                <label htmlFor="name" className="block text-sm text-left font-medium text-gray-700">Garage Name</label>
+                                {/* 5. Pastikan 'name' di sini cocok dengan state */}
+                                <input type="text" id="name" name="name" placeholder='Garage name'
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-3" 
+                                    value={formData.name}
+                                    onChange={handleChange}
+                                />
                             </div>
                             <div>
-                                <label className="block text-sm text-left font-medium text-gray-700">Address</label>
-                                <textarea rows="3" placeholder="e.g., Jl. Jenderal Sudirman No. 12, Jakarta Pusat" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-3"></textarea>
+                                <label htmlFor="address" className="block text-sm text-left font-medium text-gray-700">Address</label>
+                                <textarea id="address" name="address" rows="3"  placeholder='input garage address'
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-3"
+                                    value={formData.address}
+                                    onChange={handleChange}
+                                ></textarea>
                             </div>
                             <div>
-                                <label className="block text-sm text-left font-medium text-gray-700">Description</label>
-                                <textarea rows="4" placeholder="Describe your garage..." className="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-3"></textarea>
+                                <label htmlFor="description" className="block text-sm text-left font-medium text-gray-700">Description</label>
+                                <textarea id="description" name="description" rows="4" placeholder='input dercriptions here'
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-3"
+                                    value={formData.description}
+                                    onChange={handleChange}
+                                ></textarea>
                             </div>
                             <div>
-                                <label className="block text-sm text-left font-medium text-gray-700">Price per Month (Rp)</label>
-                                <input type="number" placeholder="e.g., 500000" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-3" />
+                                <label htmlFor="pricePerHour" className="block text-sm text-left font-medium text-gray-700">Price per Hour (Rp)</label>
+                                <input type="number" id="pricePerHour" name="pricePerHour"
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-3"
+                                    value={formData.pricePerHour}
+                                    onChange={handleChange}
+                                />
                             </div>
                         </div>
                     </div>
+
+                    {error && <p className="text-red-500 text-sm text-center mt-4">{error}</p>}
 
                     <div className="flex justify-end gap-4 pt-6 mt-6 border-t">
                         <button type="button" onClick={onClose} className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300">
                             Cancel
                         </button>
-                        <button type="submit" className="bg-slate-800 text-white px-6 py-2 rounded-lg font-semibold border hover:text-gray-600 hover:bg-transparent">
-                            Save Garage
+                        <button type="submit" disabled={loading} className="bg-slate-800 text-white px-6 py-2 rounded-lg font-semibold disabled:opacity-50">
+                            {loading ? 'Saving...' : 'Save Garage'}
                         </button>
                     </div>
                 </form>
