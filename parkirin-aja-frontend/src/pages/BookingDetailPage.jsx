@@ -1,14 +1,16 @@
-import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
 import { FaArrowLeft } from 'react-icons/fa';
+import { useParams, Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import bookingService from '../api/BookingService';
 import garageService from '../api/GarageService';
+import SuccessPopUp from '../components/SuccessPopUp';
 
 const BookingDetailPage = () => {
     const { id } = useParams();
     const [booking, setBooking] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [showSuccessPopup, setShowSuccessPopup] = useState(false);
 
     useEffect(() => {
         const fetchDetails = async () => {
@@ -34,6 +36,8 @@ const BookingDetailPage = () => {
 
     const [isCancelling, setIsCancelling] = useState(false);
     const [cancelError, setCancelError] = useState(null);
+    const [isPaying, setIsPaying] = useState(false);
+    const [paymentError, setPaymentError] = useState(null);
 
     const handleCancelBooking = async () => {
         if (!window.confirm('Are you sure you want to cancel this booking?')) {
@@ -56,6 +60,24 @@ const BookingDetailPage = () => {
         }
     };
 
+    const handlePayment = async () => {
+        setIsPaying(true);
+        setPaymentError(null);
+        try {
+            const response = await bookingService.startPayment(id);
+            const updatedBookingData = response.data.data;
+            setBooking(prevBooking => ({ ...prevBooking, ...updatedBookingData }));
+            setShowSuccessPopup(true); // Show custom popup
+        } catch (err) {
+            const message = err.response?.data?.message || 'Failed to process payment.';
+            setPaymentError(message);
+            alert(message);
+            console.error(err);
+        } finally {
+            setIsPaying(false);
+        }
+    };
+
     const renderActionButtons = () => {
         if (!booking) return null;
 
@@ -69,15 +91,21 @@ const BookingDetailPage = () => {
                                     type="button" 
                                     className="px-6 py-3 bg-red-100 text-red-700 rounded-lg font-semibold hover:bg-red-200 disabled:opacity-50"
                                     onClick={handleCancelBooking}
-                                    disabled={isCancelling}
+                                    disabled={isCancelling || isPaying}
                                 >
                                     {isCancelling ? 'Cancelling...' : 'Cancel Booking'}
                                 </button>
-                                <button type="submit" className="px-6 py-3 bg-slate-800 text-white rounded-lg font-semibold border hover:bg-transparent hover:text-gray-600">
-                                    Proceed to Payment
+                                <button 
+                                    type="button" 
+                                    className="px-6 py-3 bg-slate-800 text-white rounded-lg font-semibold border hover:bg-transparent hover:text-gray-600 disabled:opacity-50"
+                                    onClick={handlePayment}
+                                    disabled={isPaying || isCancelling}
+                                >
+                                    {isPaying ? 'Processing...' : 'Proceed to Payment'}
                                 </button>
                             </div>
                             {cancelError && <p className="text-red-500 text-sm mt-2">{cancelError}</p>}
+                            {paymentError && <p className="text-red-500 text-sm mt-2">{paymentError}</p>}
                         </div>
                     </>
                 );
@@ -108,6 +136,13 @@ const BookingDetailPage = () => {
 
     return (
         <div className="min-h-screen bg-slate-100 py-12">
+            <SuccessPopUp 
+                isOpen={showSuccessPopup}
+                onClose={() => setShowSuccessPopup(false)}
+                title="Payment Successful!"
+                message="Your booking has been confirmed and paid."
+                buttonText="OK"
+            />
             <div className="container mx-auto px-6">
                 <div className="w-full max-w-4xl mx-auto">
                     <Link to="/mybookings" className="flex items-center gap-2 text-slate-600 font-semibold mb-4 hover:text-slate-800">

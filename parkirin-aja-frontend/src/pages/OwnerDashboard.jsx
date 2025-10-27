@@ -100,7 +100,7 @@ const OwnerDashboard = () => {
                                 <div>
                                     <p className="font-semibold">Booking ID: {req.booking_id}</p>
                                     <p className="text-sm text-gray-500">
-                                        Status: <span className={`font-medium ${req.status === 'pending' ? 'text-yellow-500' : 'text-gray-600'}`}>{req.status}</span>
+                                        Status: <span className={`font-medium ${req.status === 'pending' ? 'text-yellow-500' : 'text-red-500'}`}>{req.status}</span>
                                     </p>
                                 </div>
                                 <span className="text-sm font-medium text-gray-600">

@@ -32,6 +32,10 @@ const getAllBookingsForAdmin = () => {
   return apiClient.get('/bookings/admin/bookings');
 };
 
+const startPayment = (bookingId) => {
+  return apiClient.post(`/bookings/${bookingId}/payment`);
+};
+
 const bookingService = {
   createBooking,
   getMyBookings,
@@ -40,7 +44,8 @@ const bookingService = {
   confirmBooking,
   rejectBooking,
   cancelBooking,
-  getAllBookingsForAdmin
+  getAllBookingsForAdmin,
+  startPayment
 };
 
 export default bookingService;
