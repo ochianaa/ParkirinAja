@@ -1,57 +1,101 @@
 const { db, bookings, reviews } = require('../db');
-const { eq, and } = require('drizzle-orm');
+const { eq, and, inArray, or } = require('drizzle-orm');
 
-// Helper function to validate garage existence
+// Validasi apakah garasi ada di garage service
 const validateGarageExists = async (garageId) => {
   try {
-    // For development/testing: Skip validation if SKIP_GARAGE_VALIDATION env var is set
-    if (process.env.SKIP_GARAGE_VALIDATION === 'true') {
-      console.log(`Skipping garage validation for garage_id: ${garageId} (SKIP_GARAGE_VALIDATION=true)`);
-      return { exists: true, garage: { id: garageId, name: 'Mock Garage' } };
-    }
-
     // In a microservices architecture, this should call the garage service
     const garageServiceUrl = process.env.GARAGE_SERVICE_URL || 'http://localhost:8080/api/garages';
     const url = `${garageServiceUrl}/${garageId}`;
-    
-    console.log(`Validating garage existence: ${url}`);
-    
+
     const response = await fetch(url, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
       },
-      // Add timeout to prevent hanging
-      signal: AbortSignal.timeout(5000), // 5 second timeout
+      timeout: 5000, // 5 second timeout
     });
 
-    console.log(`Garage validation response: ${response.status} ${response.statusText}`);
-
-    if (!response.ok) {
-      if (response.status === 404) {
-        return { exists: false, error: 'Garage not found' };
-      }
-      return { exists: false, error: `Failed to validate garage (HTTP ${response.status})` };
+    if (response.ok) {
+      const garage = await response.json();
+      return { exists: true, garage };
+    } else if (response.status === 404) {
+      return { exists: false, error: 'Garage not found' };
+    } else {
+      return { exists: false, error: 'Garage service error' };
     }
-
-    const garage = await response.json();
-    console.log(`Garage validation successful for garage_id: ${garageId}`);
-    return { exists: true, garage };
   } catch (error) {
-    console.error('Error validating garage:', error.message);
+    console.error('Error validating garage:', error);
     
-    // More specific error messages
+    // Handle specific error types
     if (error.name === 'AbortError') {
       return { exists: false, error: 'Garage service timeout' };
-    }
-    if (error.code === 'ECONNREFUSED') {
+    } else if (error.code === 'ECONNREFUSED') {
       return { exists: false, error: 'Garage service connection refused' };
-    }
-    if (error.code === 'ENOTFOUND') {
+    } else if (error.code === 'ENOTFOUND') {
       return { exists: false, error: 'Garage service host not found' };
+    } else {
+      return { exists: false, error: `Garage service unavailable: ${error.message}` };
     }
-    
-    return { exists: false, error: `Garage service unavailable: ${error.message}` };
+  }
+};
+
+// Validasi apakah owner memiliki garasi tertentu
+const validateGarageOwnership = async (ownerId, garageId) => {
+  try {
+    const garageServiceUrl = process.env.GARAGE_SERVICE_URL || 'http://localhost:8080/api/garages';
+    const url = `${garageServiceUrl}/${garageId}`;
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      timeout: 5000,
+    });
+
+    if (response.ok) {
+      const garage = await response.json();
+      // Check if the garage belongs to the owner
+      return { 
+        isOwner: garage && garage.owner_id === ownerId, 
+        garage: garage 
+      };
+    } else if (response.status === 404) {
+      return { isOwner: false, error: 'Garage not found' };
+    } else {
+      return { isOwner: false, error: 'Garage service error' };
+    }
+  } catch (error) {
+    console.error('Error validating garage ownership:', error);
+    return { isOwner: false, error: `Garage service unavailable: ${error.message}` };
+  }
+};
+
+// Mendapatkan daftar garasi milik owner
+const getOwnerGarages = async (ownerId, authToken) => {
+  try {
+    const garageServiceUrl = process.env.GARAGE_SERVICE_URL || 'http://localhost:8080/api/garages';
+    const url = `${garageServiceUrl}/owner/my-garages`;
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${authToken}`,
+      },
+      timeout: 5000,
+    });
+
+    if (response.ok) {
+      const result = await response.json();
+      return { success: true, garages: result || [] };
+    } else {
+      return { success: false, error: 'Failed to fetch owner garages' };
+    }
+  } catch (error) {
+    console.error('Error fetching owner garages:', error);
+    return { success: false, error: `Garage service unavailable: ${error.message}` };
   }
 };
 
@@ -206,13 +250,37 @@ exports.cancelBooking = async (req, res) => {
 exports.getOwnerRequests = async (req, res) => {
   try {
     const ownerId = req.user?.id;
+    const authToken = req.header('Authorization')?.replace('Bearer ', '');
 
-    // TODO: Nanti bisa diubah untuk join ke tabel garages (owner_id)
-    const ownerBookings = await db.select().from(bookings);
+    // Get owner's garages from garage service
+    const ownerGaragesResult = await getOwnerGarages(ownerId, authToken);
+    
+    if (!ownerGaragesResult.success) {
+      return res.status(503).json({ 
+        message: "Unable to fetch garage information",
+        error: ownerGaragesResult.error 
+      });
+    }
+
+    const ownerGarageIds = ownerGaragesResult.garages.map(garage => garage.garage_id);
+    
+    if (ownerGarageIds.length === 0) {
+      return res.status(200).json({
+        message: "No garages found for this owner",
+        data: [],
+      });
+    }
+
+    // Filter bookings by owned garages only
+    const ownerBookings = await db
+      .select()
+      .from(bookings)
+      .where(inArray(bookings.garage_id, ownerGarageIds));
 
     res.status(200).json({
       message: "Fetched owner booking requests successfully",
       data: ownerBookings,
+      garage_count: ownerGarageIds.length
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -223,6 +291,34 @@ exports.getOwnerRequests = async (req, res) => {
 exports.confirmBooking = async (req, res) => {
   try {
     const bookingId = Number(req.params.bookingId);
+    const ownerId = req.user?.userId;
+
+    // First, get the booking to check which garage it belongs to
+    const bookingResult = await db
+      .select()
+      .from(bookings)
+      .where(eq(bookings.booking_id, bookingId));
+
+    if (bookingResult.length === 0) {
+      return res.status(404).json({ message: "Booking not found" });
+    }
+
+    const booking = bookingResult[0];
+
+    // Validate garage ownership
+    const ownershipResult = await validateGarageOwnership(ownerId, booking.garage_id);
+    
+    if (!ownershipResult.isOwner) {
+      if (ownershipResult.error) {
+        return res.status(503).json({ 
+          message: "Unable to validate garage ownership",
+          error: ownershipResult.error 
+        });
+      }
+      return res.status(403).json({ 
+        message: "Access denied. You can only confirm bookings for your own garages." 
+      });
+    }
 
     const [updated] = await db
       .update(bookings)
@@ -232,9 +328,6 @@ exports.confirmBooking = async (req, res) => {
       })
       .where(eq(bookings.booking_id, bookingId))
       .returning();
-
-    if (!updated)
-      return res.status(404).json({ message: "Booking not found" });
 
     res.status(200).json({
       message: "Booking confirmed successfully",
@@ -249,6 +342,34 @@ exports.confirmBooking = async (req, res) => {
 exports.rejectBooking = async (req, res) => {
   try {
     const bookingId = Number(req.params.bookingId);
+    const ownerId = req.user?.id;
+
+    // First, get the booking to check which garage it belongs to
+    const bookingResult = await db
+      .select()
+      .from(bookings)
+      .where(eq(bookings.booking_id, bookingId));
+
+    if (bookingResult.length === 0) {
+      return res.status(404).json({ message: "Booking not found" });
+    }
+
+    const booking = bookingResult[0];
+
+    // Validate garage ownership
+    const ownershipResult = await validateGarageOwnership(ownerId, booking.garage_id);
+    
+    if (!ownershipResult.isOwner) {
+      if (ownershipResult.error) {
+        return res.status(503).json({ 
+          message: "Unable to validate garage ownership",
+          error: ownershipResult.error 
+        });
+      }
+      return res.status(403).json({ 
+        message: "Access denied. You can only reject bookings for your own garages." 
+      });
+    }
 
     const [updated] = await db
       .update(bookings)
@@ -258,9 +379,6 @@ exports.rejectBooking = async (req, res) => {
       })
       .where(eq(bookings.booking_id, bookingId))
       .returning();
-
-    if (!updated)
-      return res.status(404).json({ message: "Booking not found" });
 
     res.status(200).json({
       message: "Booking rejected successfully",
@@ -552,48 +670,102 @@ exports.getReviewById = async (req, res) => {
   }
 };
 
-// Mendapatkan ringkasan pendapatan owner (simplified version)
+// Mendapatkan ringkasan pendapatan owner
 exports.getOwnerIncome = async (req, res) => {
   try {
     const ownerId = req.user?.id;
+    const authToken = req.header('Authorization')?.replace('Bearer ', '');
 
-    // For now, return all paid bookings (garage ownership not implemented yet)
+    // Get owner's garages from garage service
+    const ownerGaragesResult = await getOwnerGarages(ownerId, authToken);
+    
+    if (!ownerGaragesResult.success) {
+      return res.status(503).json({ 
+        message: "Unable to fetch garage information",
+        error: ownerGaragesResult.error 
+      });
+    }
+
+    const ownerGarageIds = ownerGaragesResult.garages.map(garage => garage.garage_id);
+    
+    if (ownerGarageIds.length === 0) {
+      return res.status(200).json({
+        message: "No garages found for this owner",
+        data: {
+          total_income: 0,
+          total_bookings: 0,
+          period: "all_time"
+        },
+      });
+    }
+
+    // Filter paid bookings by owned garages only
     const paidBookings = await db
       .select()
       .from(bookings)
-      .where(eq(bookings.payment_status, 'paid'));
+      .where(
+        and(
+          eq(bookings.payment_status, 'paid'),
+          inArray(bookings.garage_id, ownerGarageIds)
+        )
+      );
 
     const totalIncome = paidBookings.reduce((acc, booking) => acc + Number(booking.total_price), 0);
 
     res.status(200).json({
-      message: "Owner income fetched successfully (simplified version)",
+      message: "Owner income fetched successfully",
       data: {
         total_income: totalIncome,
         total_bookings: paidBookings.length,
-        period: "all_time"
-      },
-      note: "This is a simplified implementation. Garage ownership filtering not implemented yet."
+        period: "all_time",
+        garage_count: ownerGarageIds.length
+      }
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
-// Mendapatkan riwayat detail transaksi owner (simplified version)
+// Mendapatkan riwayat detail transaksi owner
 exports.getOwnerTransactions = async (req, res) => {
   try {
     const ownerId = req.user?.id;
+    const authToken = req.header('Authorization')?.replace('Bearer ', '');
 
-    // For now, return all paid bookings (garage ownership not implemented yet)
+    // Get owner's garages from garage service
+    const ownerGaragesResult = await getOwnerGarages(ownerId, authToken);
+    
+    if (!ownerGaragesResult.success) {
+      return res.status(503).json({ 
+        message: "Unable to fetch garage information",
+        error: ownerGaragesResult.error 
+      });
+    }
+
+    const ownerGarageIds = ownerGaragesResult.garages.map(garage => garage.garage_id);
+    
+    if (ownerGarageIds.length === 0) {
+      return res.status(200).json({
+        message: "No garages found for this owner",
+        data: [],
+      });
+    }
+
+    // Filter paid bookings by owned garages only
     const transactions = await db
       .select()
       .from(bookings)
-      .where(eq(bookings.payment_status, 'paid'));
+      .where(
+        and(
+          eq(bookings.payment_status, 'paid'),
+          inArray(bookings.garage_id, ownerGarageIds)
+        )
+      );
 
     res.status(200).json({
-      message: "Owner transactions fetched successfully (simplified version)",
+      message: "Owner transactions fetched successfully",
       data: transactions,
-      note: "This is a simplified implementation. Garage ownership filtering not implemented yet."
+      garage_count: ownerGarageIds.length
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
