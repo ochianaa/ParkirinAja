@@ -1,19 +1,29 @@
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import bookingService from '../api/BookingService';
+import garageService from '../api/GarageService';
 
 const OwnerDashboard = () => {
 
     const [pendingCount, setPendingCount] = useState(0);
+    const [activeGaragesCount, setActiveGaragesCount] = useState(0);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        const fetchBookingRequests = async () => {
+        const fetchData = async () => {
             try {
-                const response = await bookingService.getBookingRequests();
-                const pendingBookings = response.data.data.filter(booking => booking.status === 'pending');
+                const [bookingResponse, garageResponse] = await Promise.all([
+                    bookingService.getBookingRequests(),
+                    garageService.getMyGarages()
+                ]);
+
+                const pendingBookings = bookingResponse.data.data.filter(booking => booking.status === 'pending');
                 setPendingCount(pendingBookings.length);
+
+                const activeGarages = garageResponse.data.filter(garage => garage.status !== 'rejected');
+                setActiveGaragesCount(activeGarages.length);
+
             } catch (err) {
                 setError('Failed to load data');
                 console.error(err);
@@ -22,7 +32,7 @@ const OwnerDashboard = () => {
             }
         };
 
-        fetchBookingRequests();
+        fetchData();
     }, []);
 
 
@@ -48,7 +58,13 @@ const OwnerDashboard = () => {
                 </div>
                 <div className="rounded-lg border-1 shadow-lg shadow-black/50 bg-slate-800 text-gray-300 p-6 border-gray-300">
                     <h3 className="text-sm font-medium text-gray-300">Active Garages</h3>
-                    <p className="text-3xl font-bold mt-2">3</p>
+                    {loading ? (
+                        <p className="text-3xl font-bold mt-2">...</p>
+                    ) : error ? (
+                        <p className="text-sm font-bold mt-2 text-red-500">{error}</p>
+                    ) : (
+                        <p className="text-3xl font-bold mt-2">{activeGaragesCount}</p>
+                    )}
                 </div>
             </div>
 
