@@ -1,7 +1,33 @@
-// --- Data Contoh (Dummy Data) ---
 import { FaStar } from "react-icons/fa";
+import { useState, useEffect } from 'react';
+import bookingService from '../api/BookingService';
 
-const ReportsPage = ({ dummyTransactions }) => {
+const ReportsPage = () => {
+    const [transactions, setTransactions] = useState([]);
+    const [summaryData, setSummaryData] = useState({ total_bookings: 0, total_income: 0 });
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const [transactionsResponse, incomeResponse] = await Promise.all([
+                    bookingService.getOwnerTransactions(),
+                    bookingService.getOwnerIncome()
+                ]);
+                setTransactions(transactionsResponse.data.data);
+                setSummaryData(incomeResponse.data.data);
+            } catch (err) {
+                setError('Failed to load reports data.');
+                console.error(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, []);
+
     return (
         <div className="min-h-screen bg-slate-100 py-15 px-35">
             <h1 className="text-3xl font-bold text-slate-800 mb-10">Reports</h1>
@@ -10,11 +36,11 @@ const ReportsPage = ({ dummyTransactions }) => {
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2 mb-15">
                 <div className="rounded-lg border shadow-lg shadow-black/50 bg-slate-800 text-gray-300 p-6">
                     <h3 className="text-sm font-medium">Completed Bookings</h3>
-                    <p className="text-3xl font-bold text-white mt-2">25</p>
+                    {loading ? <p className="text-3xl font-bold text-white mt-2">...</p> : <p className="text-3xl font-bold text-white mt-2">{summaryData.total_bookings}</p>}
                 </div>
                 <div className="rounded-lg border shadow-lg shadow-black/50 bg-slate-800 text-gray-300 p-6">
                     <h3 className="text-sm font-medium">Total Revenue</h3>
-                    <p className="text-3xl font-bold text-white mt-2">Rp 35.000.000</p>
+                    {loading ? <p className="text-3xl font-bold text-white mt-2">...</p> : <p className="text-3xl font-bold text-white mt-2">Rp {Number(summaryData.total_income).toLocaleString('id-ID')}</p>}
                 </div>
             </div>
 
@@ -31,20 +57,28 @@ const ReportsPage = ({ dummyTransactions }) => {
                         </tr>
                     </thead>
                     <tbody className="divide-y">
-                        {dummyTransactions.map((tx) => (
-                            <tr key={tx.id}>
-                                <td className="p-4">{tx.date}</td>
-                                <td className="p-4 font-mono text-gray-600">{tx.bookingId}</td>
-                                <td className="p-4">Rp {tx.amount.toLocaleString('id-ID')}</td>
-                                <td className="p-4">
-                                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                                        tx.status === 'Completed' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                                    }`}>
-                                        {tx.status}
-                                    </span>
-                                </td>
-                            </tr>
-                        ))}
+                        {loading ? (
+                            <tr><td colSpan="4" className="p-4 text-center">Loading...</td></tr>
+                        ) : error ? (
+                            <tr><td colSpan="4" className="p-4 text-center text-red-500">{error}</td></tr>
+                        ) : transactions.length > 0 ? (
+                            transactions.map((tx) => (
+                                <tr key={tx.booking_id}>
+                                    <td className="p-4">{new Date(tx.updated_at).toLocaleDateString()}</td>
+                                    <td className="p-4 font-mono text-gray-600">{tx.booking_id}</td>
+                                    <td className="p-4">Rp {Number(tx.total_price).toLocaleString('id-ID')}</td>
+                                    <td className="p-4">
+                                        <span className={`px-2 py-1 text-xs font-semibold rounded-full capitalize ${
+                                            tx.payment_status === 'paid' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                                        }`}>
+                                            {tx.payment_status}
+                                        </span>
+                                    </td>
+                                </tr>
+                            ))
+                        ) : (
+                            <tr><td colSpan="4" className="p-4 text-center">No transactions found.</td></tr>
+                        )}
                     </tbody>
                 </table>
             </div>

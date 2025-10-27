@@ -36,6 +36,14 @@ const startPayment = (bookingId) => {
   return apiClient.post(`/bookings/${bookingId}/payment`);
 };
 
+const getOwnerTransactions = () => {
+  return apiClient.get('/bookings/owner/reports/transactions');
+};
+
+const getOwnerIncome = () => {
+  return apiClient.get('/bookings/owner/reports/income');
+};
+
 const bookingService = {
   createBooking,
   getMyBookings,
@@ -45,7 +53,9 @@ const bookingService = {
   rejectBooking,
   cancelBooking,
   getAllBookingsForAdmin,
-  startPayment
+  startPayment,
+  getOwnerTransactions,
+  getOwnerIncome
 };
 
 export default bookingService;
