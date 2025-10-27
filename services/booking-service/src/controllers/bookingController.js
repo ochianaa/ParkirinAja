@@ -470,20 +470,29 @@ exports.startPayment = async (req, res) => {
       return res.status(403).json({ message: "Access denied" });
     }
 
-    // Update payment status to processing
+    // Check if booking is already paid
+    if (booking.payment_status === 'paid') {
+      return res.status(400).json({ 
+        message: "Payment already completed for this booking",
+        data: booking
+      });
+    }
+
+    // Automatically complete payment and booking (simplified implementation)
     const [updated] = await db
       .update(bookings)
       .set({
-        payment_status: 'processing',
+        payment_status: 'paid',
+        status: 'completed',
         updated_at: new Date(),
       })
       .where(eq(bookings.booking_id, bookingId))
       .returning();
 
     res.status(200).json({
-      message: "Payment process started (simplified version)",
+      message: "Payment completed successfully (simplified version)",
       data: updated,
-      note: "This is a simplified implementation. Payment gateway integration skipped."
+      note: "This is a simplified implementation. Booking automatically completed upon payment request."
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
