@@ -24,27 +24,23 @@ const BookingRequestsPage = () => {
     useEffect(() => {
         const fetchDetailedRequests = async () => {
             if (requests.length > 0) {
-                const detailed = [];
-                for (const request of requests) {
+                setLoading(true);
+                const detailedPromises = requests.map(async (request) => {
+                    let garageName = 'Unknown Garage';
                     try {
-                        const user = await AdminService.getUserById(request.user_id);
-                        const garage = await garageService.getGarageById(request.garage_id);
-                        detailed.push({
-                            ...request,
-                            renterName: user.data.username,
-                            garageName: garage.data.name,
-                            dateRange: `${new Date(request.start_time).toLocaleDateString()} - ${new Date(request.end_time).toLocaleDateString()}`
-                        });
+                        const garageResponse = await garageService.getGarageById(request.garage_id);
+                        garageName = garageResponse.data.name;
                     } catch (error) {
-                        console.error(`Failed to fetch details for request ${request.booking_id}`, error);
-                        detailed.push({
-                            ...request,
-                            renterName: 'Unknown Renter',
-                            garageName: 'Unknown Garage',
-                            dateRange: `${new Date(request.start_time).toLocaleDateString()} - ${new Date(request.end_time).toLocaleDateString()}`
-                        });
+                        console.error(`Failed to fetch garage details for booking ${request.booking_id}`, error);
                     }
-                }
+                    return {
+                        ...request,
+                        renterName: `Renter ID: ${request.user_id}`,
+                        garageName: garageName,
+                        dateRange: `${new Date(request.start_time).toLocaleDateString()} - ${new Date(request.end_time).toLocaleDateString()}`
+                    };
+                });
+                const detailed = await Promise.all(detailedPromises);
                 setDetailedRequests(detailed);
             }
             setLoading(false);

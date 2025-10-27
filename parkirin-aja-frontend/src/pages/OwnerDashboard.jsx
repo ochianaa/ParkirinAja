@@ -7,6 +7,8 @@ const OwnerDashboard = () => {
 
     const [pendingCount, setPendingCount] = useState(0);
     const [activeGaragesCount, setActiveGaragesCount] = useState(0);
+    const [bookingRequests, setBookingRequests] = useState([]);
+    const [showAll, setShowAll] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -18,8 +20,13 @@ const OwnerDashboard = () => {
                     garageService.getMyGarages()
                 ]);
 
-                const pendingBookings = bookingResponse.data.data.filter(booking => booking.status === 'pending');
+                const bookings = bookingResponse.data.data;
+                const pendingBookings = bookings.filter(booking => booking.status === 'pending');
                 setPendingCount(pendingBookings.length);
+
+                // Sort bookings by most recent
+                const sortedBookings = [...bookings].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+                setBookingRequests(sortedBookings);
 
                 const activeGarages = garageResponse.data.filter(garage => garage.status !== 'rejected');
                 setActiveGaragesCount(activeGarages.length);
@@ -35,6 +42,7 @@ const OwnerDashboard = () => {
         fetchData();
     }, []);
 
+    const requestsToDisplay = showAll ? bookingRequests : bookingRequests.slice(0, 3);
 
     return (
         <div className="min-h-screen bg-slate-100 py-15 px-35">
@@ -72,23 +80,37 @@ const OwnerDashboard = () => {
             <div className="mt-15 rounded-lg border bg-white p-6 shadow-lg">
                 <div className="flex justify-between items-center mb-4">
                     <h3 className="text-xl font-bold">Recent Booking Requests</h3>
-                    <Link to="/owner/requests" className="text-sm font-semibold text-slate-800 hover:underline">View All</Link>
+                    {bookingRequests.length > 3 && (
+                        <button 
+                            onClick={() => setShowAll(!showAll)}
+                            className="text-sm font-semibold text-slate-800 hover:underline"
+                        >
+                            {showAll ? 'Show Less' : 'View All'}
+                        </button>
+                    )}
                 </div>
                 <ul className="space-y-4">
-                    <li className="flex items-center justify-between">
-                        <div>
-                            <p className="font-semibold">Budi Santoso</p>
-                            <p className="text-sm text-gray-500">Garasi Aman Downtown</p>
-                        </div>
-                        <span className="text-sm font-medium text-gray-600">20 Oct - 22 Oct</span>
-                    </li>
-                    <li className="flex items-center justify-between">
-                        <div>
-                            <p className="font-semibold">Citra Lestari</p>
-                            <p className="text-sm text-gray-500">Parkir Ekspres Kuta</p>
-                        </div>
-                        <span className="text-sm font-medium text-gray-600">25 Oct - 26 Oct</span>
-                    </li>
+                    {loading ? (
+                        <p>Loading requests...</p>
+                    ) : error ? (
+                        <p className="text-red-500">Could not load requests.</p>
+                    ) : requestsToDisplay.length > 0 ? (
+                        requestsToDisplay.map(req => (
+                            <li key={req.booking_id} className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50">
+                                <div>
+                                    <p className="font-semibold">Booking ID: {req.booking_id}</p>
+                                    <p className="text-sm text-gray-500">
+                                        Status: <span className={`font-medium ${req.status === 'pending' ? 'text-yellow-500' : 'text-gray-600'}`}>{req.status}</span>
+                                    </p>
+                                </div>
+                                <span className="text-sm font-medium text-gray-600">
+                                    {new Date(req.created_at).toLocaleDateString()}
+                                </span>
+                            </li>
+                        ))
+                    ) : (
+                        <p>No booking requests found.</p>
+                    )}
                 </ul>
             </div>
         </div>
