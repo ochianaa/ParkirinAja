@@ -763,6 +763,56 @@ const authController = {
         message: 'Internal server error while updating user'
       });
     }
+  },
+
+  // Get basic user info by ID (Authenticated users only - returns limited info)
+  async getUserInfo(req, res) {
+    try {
+      const { id } = req.params;
+
+      // Validate ID is a number
+      if (!id || isNaN(parseInt(id))) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid user ID'
+        });
+      }
+
+      // Get basic user information (no sensitive data)
+      const [user] = await db.select({
+        id: users.id,
+        username: users.username,
+        email: users.email
+      }).from(users)
+        .where(eq(users.id, parseInt(id)));
+
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: 'User not found'
+        });
+      }
+
+      res.status(200).json({
+        success: true,
+        message: 'User info retrieved successfully',
+        data: {
+          user: {
+            id: user.id,
+            username: user.username,
+            name: user.username, // Using username as name for compatibility
+            email: user.email
+          }
+        }
+      });
+
+    } catch (error) {
+      console.error('Get user info error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Internal server error while retrieving user info'
+      });
+    }
   }
 };
 
