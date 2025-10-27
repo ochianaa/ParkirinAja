@@ -1,6 +1,7 @@
-import jwt from "jsonwebtoken";
 
-export const authMiddleware = (req, res, next) => {
+const jwt = require("jsonwebtoken");
+
+const authMiddleware = (req, res, next) => {
   try {
     const authHeader = req.headers["authorization"];
     if (!authHeader) {
@@ -19,9 +20,9 @@ export const authMiddleware = (req, res, next) => {
       });
     }
 
-    // Verifikasi token
+    // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded; // Simpan data user ke request object
+    req.user = decoded; // Attach user payload
 
     next();
   } catch (error) {
@@ -32,3 +33,5 @@ export const authMiddleware = (req, res, next) => {
     });
   }
 };
+
+module.exports = { authMiddleware };

@@ -1,4 +1,5 @@
-export const ownerMiddleware = (req, res, next) => {
+
+const ownerMiddleware = (req, res, next) => {
   try {
     if (!req.user) {
       return res.status(401).json({
@@ -7,9 +8,8 @@ export const ownerMiddleware = (req, res, next) => {
       });
     }
 
-    const roles = Array.isArray(req.user.role)
-      ? req.user.role
-      : [req.user.role];
+    const rawRoles = req.user.roles ?? req.user.role;
+    const roles = Array.isArray(rawRoles) ? rawRoles : (rawRoles ? [rawRoles] : []);
 
     if (!roles.includes("owner")) {
       return res.status(403).json({
@@ -27,3 +27,5 @@ export const ownerMiddleware = (req, res, next) => {
     });
   }
 };
+
+module.exports = { ownerMiddleware };

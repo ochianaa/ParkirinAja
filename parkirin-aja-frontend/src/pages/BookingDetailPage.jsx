@@ -1,10 +1,41 @@
+import { useEffect, useState } from 'react';
+import { useParams, Link } from 'react-router-dom';
 import { FaArrowLeft } from 'react-icons/fa';
-import { Link } from 'react-router-dom';
+import bookingService from '../api/BookingService';
+import garageService from '../api/GarageService';
 
-const BookingDetailPage = ({ dummyBookingDetails }) => {
+const BookingDetailPage = () => {
+    const { id } = useParams();
+    const [booking, setBooking] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        const fetchDetails = async () => {
+            try {
+                const bookingRes = await bookingService.getMyBookingById(id);
+                const bookingData = bookingRes.data;
+
+                const garageRes = await garageService.getGarageById(bookingData.garage_id);
+                const garageData = garageRes.data;
+
+                setBooking({ ...bookingData, garage: garageData });
+
+            } catch (err) {
+                setError('Failed to load booking details.');
+                console.error(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchDetails();
+    }, [id]);
 
     const renderActionButtons = () => {
-        switch (dummyBookingDetails.status) {
+        if (!booking) return null;
+
+        switch (booking.status) {
             case 'pending':
                 return (
                     <>
@@ -29,44 +60,56 @@ const BookingDetailPage = ({ dummyBookingDetails }) => {
         }
     };
 
+    if (loading) {
+        return <div className="min-h-screen bg-slate-100 py-12 text-center">Loading details...</div>;
+    }
+
+    if (error) {
+        return <div className="min-h-screen bg-slate-100 py-12 text-center text-red-500">{error}</div>;
+    }
+
+    if (!booking) {
+        return <div className="min-h-screen bg-slate-100 py-12 text-center">Booking not found.</div>;
+    }
+
     return (
         <div className="min-h-screen bg-slate-100 py-12">
             <div className="container mx-auto px-6">
                 <div className="w-full max-w-4xl mx-auto">
-                    <Link to="/bookings" className="flex items-center gap-2 text-slate-600 font-semibold mb-4 hover:text-slate-800">
+                    <Link to="/mybookings" className="flex items-center gap-2 text-slate-600 font-semibold mb-4 hover:text-slate-800">
                         <FaArrowLeft /> Back to My Bookings
                     </Link>
                     <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-                        <img src={dummyBookingDetails.garage.image} alt={dummyBookingDetails.garage.name} className="w-full h-64 object-cover" />
+                        <img src={booking.garage.image} alt={booking.garage.name} className="w-full h-64 object-cover" />
                         <div className="p-8">
                             <div className="border-b pb-4 mb-6">
-                                <h2 className="text-3xl font-bold text-slate-800">{dummyBookingDetails.garage.name}</h2>
-                                <p className="text-md text-gray-500 mt-1">{dummyBookingDetails.garage.address}</p>
+                                <h2 className="text-3xl font-bold text-slate-800">{booking.garage.name}</h2>
+                                <p className="text-md text-gray-500 mt-1">{booking.garage.address}</p>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-md">
                                 <div>
                                     <h4 className="font-semibold text-gray-500">Booking ID</h4>
-                                    <p className="text-slate-800 font-bold">BK-{dummyBookingDetails.id.toString().padStart(6, '0')}</p>
+                                    <p className="text-slate-800 font-bold">BK-{booking.booking_id.toString().padStart(6, '0')}</p>
                                 </div>
                                 <div>
                                     <h4 className="font-semibold text-gray-500">Status</h4>
-                                    <p className="text-slate-800 font-bold capitalize">{dummyBookingDetails.status}</p>
+                                    <p className="text-slate-800 font-bold capitalize">{booking.status}</p>
                                 </div>
                                 <div>
                                     <h4 className="font-semibold text-gray-500">Start Time</h4>
-                                    <p className="text-slate-800 font-bold">{dummyBookingDetails.startTime}</p>
+                                    <p className="text-slate-800 font-bold">{new Date(booking.start_time).toLocaleString()}</p>
                                 </div>
                                 <div>
                                     <h4 className="font-semibold text-gray-500">End Time</h4>
-                                    <p className="text-slate-800 font-bold">{dummyBookingDetails.endTime}</p>
+                                    <p className="text-slate-800 font-bold">{new Date(booking.end_time).toLocaleString()}</p>
                                 </div>
                             </div>
                             
                             <div className="border-t pt-6 mt-6">
                                 <div className="flex justify-between items-center">
                                     <h3 className="text-xl font-bold text-slate-800">Total Price</h3>
-                                    <p className="text-2xl font-bold text-slate-800">Rp {dummyBookingDetails.totalPrice.toLocaleString('id-ID')}</p>
+                                    <p className="text-2xl font-bold text-slate-800">Rp {Number(booking.total_price).toLocaleString('id-ID')}</p>
                                 </div>
                             </div>
 

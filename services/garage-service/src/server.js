@@ -8,6 +8,9 @@ const PORT = process.env.PORT || 3002;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+const garageRoutes = require('./routes/garageRoutes');
+app.use('/', garageRoutes);
+
 app.get('/', (req, res) => {
   res.send('Hello from the Garage Service! 🏠');
 });

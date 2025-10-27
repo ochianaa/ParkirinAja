@@ -1,4 +1,5 @@
-export const adminMiddleware = (req, res, next) => {
+
+const adminMiddleware = (req, res, next) => {
   try {
     if (!req.user) {
       return res.status(401).json({
@@ -7,10 +8,8 @@ export const adminMiddleware = (req, res, next) => {
       });
     }
 
-    // Bisa role tunggal (string) atau banyak (array)
-    const roles = Array.isArray(req.user.role)
-      ? req.user.role
-      : [req.user.role];
+    const rawRoles = req.user.roles ?? req.user.role;
+    const roles = Array.isArray(rawRoles) ? rawRoles : (rawRoles ? [rawRoles] : []);
 
     if (!roles.includes("admin")) {
       return res.status(403).json({
@@ -28,3 +27,5 @@ export const adminMiddleware = (req, res, next) => {
     });
   }
 };
+
+module.exports = { adminMiddleware };

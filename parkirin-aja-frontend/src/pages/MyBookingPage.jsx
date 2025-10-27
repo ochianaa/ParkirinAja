@@ -1,5 +1,8 @@
-import { Link } from 'react-router-dom';
 import { FaCalendarAlt, FaTag, FaCheckCircle, FaTimesCircle, FaHourglassHalf } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import bookingService from '../api/BookingService';
+import garageService from '../api/GarageService';
 
 const getStatusInfo = (status) => {
     switch (status) {
@@ -14,25 +17,75 @@ const getStatusInfo = (status) => {
     }
 };
 
-const MyBookingPage = ({ dummyBookings }) => {
+const MyBookingPage = () => {
+
+    const [bookings, setBookings] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        const fetchBookings = async () => {
+            try {
+                // Ambil data booking dan data semua garasi secara bersamaan
+                const [bookingsResponse, garagesResponse] = await Promise.all([
+                    bookingService.getMyBookings(),
+                    garageService.getAllGarages() 
+                ]);
+
+                const myBookings = bookingsResponse.data.data || [];
+                const allGarages = garagesResponse.data || [];
+
+                // Buat pemetaan dari garage_id ke detail garasi untuk pencarian cepat
+                const garagesMap = allGarages.reduce((acc, garage) => {
+                    acc[garage.garage_id] = garage;
+                    return acc;
+                }, {});
+
+                // Gabungkan data booking dengan detail garasi
+                const populatedBookings = myBookings.map(booking => ({
+                    ...booking,
+                    garage: garagesMap[booking.garage_id] || { name: 'Garage not found' } 
+                }));
+
+                setBookings(populatedBookings);
+
+            } catch (err) {
+                setError('Failed to fetch your bookings. Please try again later.');
+                console.error(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchBookings();
+    }, []);
+
+    if (loading) {
+        return <div className="p-10 text-center">Loading your bookings...</div>;
+    }
+
+    if (error) {
+        return <div className="p-10 text-center text-red-500">{error}</div>;
+    }
+
     return (
-        <div id="mybookings" className="min-h-screen bg-slate-100 py-12">
+        <div id="mybookings" className="min-h-screen bg-slate-100 py-15">
             <div className="container mx-auto px-6">
                 <div className="w-full max-w-4xl mx-auto">
-                    <h2 className="text-3xl font-bold text-slate-800 mb-6 pb-4">My Bookings</h2>
+                    <h2 className="text-3xl font-bold text-slate-800 mb-6 pb-10">My Bookings</h2>
                     
-                    {dummyBookings.length > 0 ? (
+                    {bookings.length > 0 ? (
                         <div className="space-y-4">
-                            {dummyBookings.map((booking) => {
+                            {bookings.map((booking) => {
                                 const statusInfo = getStatusInfo(booking.status);
                                 return (
-                                    <Link to={`/my-bookings/${booking.id}`} key={booking.id} className="block">
-                                        <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow flex flex-col sm:flex-row justify-between items-start sm:items-center">
+                                    <Link to={`/mybookings/${booking.booking_id}`} key={booking.booking_id} className="block">
+                                        <div className="bg-slate-800 text-white p-6 pl-8 pr-8 rounded-lg shadow-lg shadow-black/50 flex flex-col sm:flex-row justify-between items-start sm:items-center">
                                             <div>
-                                                <h3 className="text-xl font-bold text-slate-800">{booking.garageName}</h3>
-                                                <div className="flex items-center gap-4 text-sm text-gray-500 mt-2">
-                                                    <span className="flex items-center gap-2"><FaCalendarAlt /> {booking.date}</span>
-                                                    <span className="flex items-center gap-2"><FaTag /> Rp {booking.total.toLocaleString('id-ID')}</span>
+                                                <h3 className="text-xl font-bold text-white">{booking.garage.name}</h3>
+                                                <div className="flex items-center gap-4 text-sm text-gray-300 mt-2 pl-5">
+                                                    <span className="flex items-center gap-2"><FaCalendarAlt /> {new Date(booking.start_time).toLocaleDateString()}</span>
+                                                    <span className="flex items-center gap-2"><FaTag /> Rp {Number(booking.total_price).toLocaleString('id-ID')}</span>
                                                 </div>
                                             </div>
                                             <div className={`mt-4 sm:mt-0 flex items-center gap-2 font-semibold ${statusInfo.color}`}>

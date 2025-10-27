@@ -1,4 +1,4 @@
-import SearchForm from '../components/SearchForm'
+import FeaturedGarageSection from '../components/FeaturedGarageSection';
 import { TypeAnimation } from 'react-type-animation';
 
 const Home = () => {
@@ -16,7 +16,7 @@ const Home = () => {
                     repeat={Infinity}
                 />
                 <p className="text-xl text-slate-300 mb-20">Discover secure, affordable garage spaces in your area. <br/> Book instantly and park with confidence.</p>
-                <SearchForm />
+                <FeaturedGarageSection />
             </div>
         </section>
     )
