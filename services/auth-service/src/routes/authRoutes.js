@@ -130,6 +130,9 @@ router.get('/profile', authMiddleware, authController.getProfile);
 // PUT /api/auth/profile (Login Required)
 router.put('/profile', authMiddleware, updateProfileValidation, authController.updateProfile);
 
+// GET /api/auth/user-info/:id (Login Required - for getting basic user info)
+router.get('/user-info/:id', authMiddleware, authController.getUserInfo);
+
 // Validation middleware for admin user update
 const adminUpdateUserValidation = [
   body('username')

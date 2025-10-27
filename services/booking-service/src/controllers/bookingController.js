@@ -99,6 +99,61 @@ const getOwnerGarages = async (ownerId, authToken) => {
   }
 };
 
+// Mendapatkan informasi user dari auth service
+const getUserInfo = async (userId, authToken) => {
+  try {
+    const authServiceUrl = process.env.AUTH_SERVICE_URL || 'http://localhost:8080/api/auth';
+    const url = `${authServiceUrl}/user-info/${userId}`;
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${authToken}`,
+      },
+      timeout: 5000,
+    });
+
+    if (response.ok) {
+      const result = await response.json();
+      return { success: true, user: result.data.user };
+    } else {
+      console.error('Failed to fetch user info:', response.status, response.statusText);
+      return { success: false, error: 'Failed to fetch user information' };
+    }
+  } catch (error) {
+    console.error('Error fetching user info:', error);
+    return { success: false, error: `Auth service unavailable: ${error.message}` };
+  }
+};
+
+// Mendapatkan informasi garage dari garage service
+const getGarageInfo = async (garageId, authToken) => {
+  try {
+    const garageServiceUrl = process.env.GARAGE_SERVICE_URL || 'http://localhost:8080/api/garages';
+    const url = `${garageServiceUrl}/${garageId}`;
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${authToken}`,
+      },
+      timeout: 5000,
+    });
+
+    if (response.ok) {
+      const result = await response.json();
+      return { success: true, garage: result };
+    } else {
+      return { success: false, error: 'Failed to fetch garage information' };
+    }
+  } catch (error) {
+    console.error('Error fetching garage info:', error);
+    return { success: false, error: `Garage service unavailable: ${error.message}` };
+  }
+};
+
 // PENYEWA (RENTER)
 
 // Membuat permintaan booking baru
@@ -268,6 +323,7 @@ exports.getOwnerRequests = async (req, res) => {
       return res.status(200).json({
         message: "No garages found for this owner",
         data: [],
+        garage_count: 0
       });
     }
 
@@ -277,9 +333,43 @@ exports.getOwnerRequests = async (req, res) => {
       .from(bookings)
       .where(inArray(bookings.garage_id, ownerGarageIds));
 
+    // Create a map of garage information for quick lookup
+    const garageMap = {};
+    ownerGaragesResult.garages.forEach(garage => {
+      garageMap[garage.garage_id] = garage;
+    });
+
+    // Enhance bookings with nested user and garage information
+    const enhancedBookings = await Promise.all(
+      ownerBookings.map(async (booking) => {
+        // Get user information
+        const userResult = await getUserInfo(booking.user_id, authToken);
+        const userName = userResult.success ? userResult.user.name || userResult.user.username || 'Unknown User' : 'Unknown User';
+        
+        // Get garage information from our map
+        const garage = garageMap[booking.garage_id];
+        const garageName = garage ? garage.name || garage.garage_name || 'Unknown Garage' : 'Unknown Garage';
+
+        // Remove user_id and garage_id from the booking object since they're in nested objects
+        const { user_id, garage_id, ...bookingWithoutIds } = booking;
+        
+        return {
+          ...bookingWithoutIds,
+          users: {
+            user_id: booking.user_id,
+            user_name: userName
+          },
+          garages: {
+            garage_id: booking.garage_id,
+            garage_name: garageName
+          }
+        };
+      })
+    );
+
     res.status(200).json({
       message: "Fetched owner booking requests successfully",
-      data: ownerBookings,
+      data: enhancedBookings,
       garage_count: ownerGarageIds.length
     });
   } catch (error) {
