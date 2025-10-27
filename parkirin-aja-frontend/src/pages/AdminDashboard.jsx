@@ -1,20 +1,23 @@
 import AdminService from "../api/AdminService";
 import garageService from "../api/GarageService";
+import bookingService from "../api/BookingService";
 import { useEffect, useState } from "react";
 
 const AdminDashboard = () => {
 
     const [totalUsers, setTotalUsers] = useState(0);
     const [totalGarages, setTotalGarages] = useState(0);
+    const [totalBookings, setTotalBookings] = useState(0);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     useEffect(() => {
         const fetchAnalytics = async () => {
             try {
-                const [userResponse, garageResponse] = await Promise.all([
+                const [userResponse, garageResponse, bookingResponse] = await Promise.all([
                     AdminService.getAllUsers(),
-                    garageService.getAllGarages()
+                    garageService.getAllGarages(),
+                    bookingService.getAllBookingsForAdmin()
                 ]);
 
                 const userCount = userResponse.data.data.users.length;
@@ -22,6 +25,9 @@ const AdminDashboard = () => {
 
                 const garageCount = garageResponse.data.length;
                 setTotalGarages(garageCount);
+
+                const bookingCount = bookingResponse.data.data.length;
+                setTotalBookings(bookingCount);
 
             } catch (err) {
                 setError('Failed to load dashboard data.');
@@ -63,7 +69,13 @@ const AdminDashboard = () => {
                 </div>
                 <div className="rounded-lg border-1 shadow-lg shadow-black/50 bg-slate-800 text-gray-300 p-6 border-gray-300">
                     <h3 className="text-sm font-medium text-gray-300">Total Bookings</h3>
-                    <p className="text-3xl font-bold text-white mt-2">5,400</p>
+                    {loading ? (
+                        <p className="text-3xl font-bold mt-2 text-gray-300">...</p>
+                    ) : error ? (
+                        <p className="text-sm font-bold mt-2 text-red-500">{error}</p>
+                    ) : (
+                        <p className="text-3xl font-bold text-white mt-2">{totalBookings.toLocaleString()}</p>
+                    )}
                 </div>
                 <div className="rounded-lg border-1 shadow-lg shadow-black/50 bg-slate-800 text-gray-300 p-6 border-gray-300">
                     <h3 className="text-sm font-medium text-gray-300">Total Revenue</h3>
