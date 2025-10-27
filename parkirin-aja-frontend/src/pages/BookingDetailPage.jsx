@@ -32,6 +32,30 @@ const BookingDetailPage = () => {
         fetchDetails();
     }, [id]);
 
+    const [isCancelling, setIsCancelling] = useState(false);
+    const [cancelError, setCancelError] = useState(null);
+
+    const handleCancelBooking = async () => {
+        if (!window.confirm('Are you sure you want to cancel this booking?')) {
+            return;
+        }
+
+        setIsCancelling(true);
+        setCancelError(null);
+        try {
+            await bookingService.cancelBooking(id);
+            setBooking(prevBooking => ({ ...prevBooking, status: 'cancelled' }));
+            alert('Booking cancelled successfully.');
+        } catch (err) {
+            const message = err.response?.data?.message || 'Failed to cancel booking.';
+            setCancelError(message);
+            alert(message);
+            console.error(err);
+        } finally {
+            setIsCancelling(false);
+        }
+    };
+
     const renderActionButtons = () => {
         if (!booking) return null;
 
@@ -39,12 +63,22 @@ const BookingDetailPage = () => {
             case 'pending':
                 return (
                     <>
-                        <button type="button" className="px-6 py-3 bg-red-100 text-red-700 rounded-lg font-semibold hover:bg-red-200">
-                            Cancel Booking
-                        </button>
-                        <button type="submit" className="px-6 py-3 bg-slate-800 text-white rounded-lg font-semibold border hover:bg-transparent hover:text-gray-600">
-                            Proceed to Payment
-                        </button>
+                        <div className="flex flex-col items-end">
+                            <div className="flex gap-4">
+                                <button 
+                                    type="button" 
+                                    className="px-6 py-3 bg-red-100 text-red-700 rounded-lg font-semibold hover:bg-red-200 disabled:opacity-50"
+                                    onClick={handleCancelBooking}
+                                    disabled={isCancelling}
+                                >
+                                    {isCancelling ? 'Cancelling...' : 'Cancel Booking'}
+                                </button>
+                                <button type="submit" className="px-6 py-3 bg-slate-800 text-white rounded-lg font-semibold border hover:bg-transparent hover:text-gray-600">
+                                    Proceed to Payment
+                                </button>
+                            </div>
+                            {cancelError && <p className="text-red-500 text-sm mt-2">{cancelError}</p>}
+                        </div>
                     </>
                 );
             case 'completed':

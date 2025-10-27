@@ -24,13 +24,18 @@ const rejectBooking = (bookingId) => {
   return apiClient.put(`/bookings/owner/requests/${bookingId}/reject`);
 };
 
+const cancelBooking = (bookingId) => {
+  return apiClient.post(`/bookings/${bookingId}/cancel`);
+};
+
 const bookingService = {
   createBooking,
   getMyBookings,
   getMyBookingById,
   getBookingRequests,
   confirmBooking,
-  rejectBooking
+  rejectBooking,
+  cancelBooking
 };
 
 export default bookingService;
