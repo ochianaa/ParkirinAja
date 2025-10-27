@@ -8,6 +8,8 @@ const getStatusInfo = (status) => {
     switch (status) {
         case 'completed':
             return { icon: <FaCheckCircle />, color: 'text-green-500', text: 'Completed' };
+        case 'confirmed':
+            return { icon: <FaCheckCircle />, color: 'text-green-500', text: 'Confirmed' };
         case 'pending':
             return { icon: <FaHourglassHalf />, color: 'text-yellow-500', text: 'Pending' };
         case 'cancelled':

@@ -17,11 +17,11 @@ const getBookingRequests = () => {
 };
 
 const confirmBooking = (bookingId) => {
-  return apiClient.put(`/bookings/owner/requests/${bookingId}/confirm`);
+  return apiClient.post(`/bookings/${bookingId}/confirm`);
 };
 
 const rejectBooking = (bookingId) => {
-  return apiClient.put(`/bookings/owner/requests/${bookingId}/reject`);
+  return apiClient.post(`/bookings/${bookingId}/reject`);
 };
 
 const cancelBooking = (bookingId) => {

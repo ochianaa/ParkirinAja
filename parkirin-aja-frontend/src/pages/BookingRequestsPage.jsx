@@ -7,12 +7,14 @@ const BookingRequestsPage = () => {
     const [requests, setRequests] = useState([]);
     const [detailedRequests, setDetailedRequests] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [processingId, setProcessingId] = useState(null);
 
     useEffect(() => {
         const fetchRequests = async () => {
             try {
                 const response = await bookingService.getBookingRequests();
-                setRequests(response.data.data);
+                const pendingRequests = response.data.data.filter(req => req.status === 'pending');
+                setRequests(pendingRequests);
             } catch (error) {
                 console.error('Error fetching booking requests:', error);
             }
@@ -50,24 +52,30 @@ const BookingRequestsPage = () => {
     }, [requests]);
 
     const handleConfirm = async (id) => {
+        setProcessingId(id);
         try {
             await bookingService.confirmBooking(id);
-            setDetailedRequests(detailedRequests.filter(request => request.booking_id !== id));
+            setDetailedRequests(prev => prev.filter(request => request.booking_id !== id));
             alert('Booking confirmed successfully!');
         } catch (error) {
             console.error('Error confirming booking:', error);
             alert('Failed to confirm booking.');
+        } finally {
+            setProcessingId(null);
         }
     };
 
     const handleReject = async (id) => {
+        setProcessingId(id);
         try {
             await bookingService.rejectBooking(id);
-            setDetailedRequests(detailedRequests.filter(request => request.booking_id !== id));
+            setDetailedRequests(prev => prev.filter(request => request.booking_id !== id));
             alert('Booking rejected successfully!');
         } catch (error) {
             console.error('Error rejecting booking:', error);
             alert('Failed to reject booking.');
+        } finally {
+            setProcessingId(null);
         }
     };
 
@@ -104,11 +112,19 @@ const BookingRequestsPage = () => {
                                         </div>
                                     </div>
                                     <div className="flex gap-3 self-end sm:self-center">
-                                        <button onClick={() => handleReject(request.booking_id)} className="px-4 py-2 bg-red-100 text-red-700 rounded-lg font-semibold text-sm hover:bg-red-200">
-                                            Reject
+                                        <button 
+                                            onClick={() => handleReject(request.booking_id)} 
+                                            className="px-4 py-2 bg-red-100 text-red-700 rounded-lg font-semibold text-sm hover:bg-red-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                            disabled={processingId === request.booking_id}
+                                        >
+                                            {processingId === request.booking_id ? 'Processing...' : 'Reject'}
                                         </button>
-                                        <button onClick={() => handleConfirm(request.booking_id)} className="px-4 py-2 bg-green-100 text-green-700 rounded-lg font-semibold text-sm hover:bg-green-200">
-                                            Confirm
+                                        <button 
+                                            onClick={() => handleConfirm(request.booking_id)} 
+                                            className="px-4 py-2 bg-green-100 text-green-700 rounded-lg font-semibold text-sm hover:bg-green-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                            disabled={processingId === request.booking_id}
+                                        >
+                                            {processingId === request.booking_id ? 'Processing...' : 'Confirm'}
                                         </button>
                                     </div>
                                 </li>
