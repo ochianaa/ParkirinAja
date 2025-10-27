@@ -1,5 +1,5 @@
-const { db, bookings } = require('../db');
-const { eq } = require('drizzle-orm');
+const { db, bookings, reviews } = require('../db');
+const { eq, and } = require('drizzle-orm');
 
 // Helper function to validate garage existence
 const validateGarageExists = async (garageId) => {
@@ -372,7 +372,7 @@ exports.startPayment = async (req, res) => {
   }
 };
 
-// Memberikan rating & review setelah sewa selesai (simplified version)
+// Memberikan rating & review setelah sewa selesai
 exports.addReview = async (req, res) => {
   try {
     const bookingId = Number(req.params.bookingId);
@@ -399,16 +399,153 @@ exports.addReview = async (req, res) => {
       return res.status(403).json({ message: "Access denied" });
     }
 
-    // For now, just return success (reviews table not implemented yet)
-    res.status(200).json({
-      message: "Review added successfully (simplified version)",
-      data: {
+    // Check if booking is completed
+    if (booking.status !== 'completed') {
+      return res.status(400).json({ message: "Can only review completed bookings" });
+    }
+
+    // Check if review already exists for this booking
+    const existingReview = await db
+      .select()
+      .from(reviews)
+      .where(eq(reviews.booking_id, bookingId));
+
+    if (existingReview.length > 0) {
+      return res.status(400).json({ message: "Review already exists for this booking" });
+    }
+
+    // Create the review
+    const newReview = await db
+      .insert(reviews)
+      .values({
         booking_id: bookingId,
+        user_id: booking.user_id,
+        garage_id: booking.garage_id,
         rating,
-        review_text,
-        created_at: new Date()
-      },
-      note: "This is a simplified implementation. Reviews table not implemented yet."
+        review_text: review_text || null,
+        created_at: new Date(),
+        updated_at: new Date()
+      })
+      .returning();
+
+    res.status(201).json({
+      message: "Review added successfully",
+      data: newReview[0]
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Get reviews for a specific garage
+exports.getGarageReviews = async (req, res) => {
+  try {
+    const garageId = Number(req.params.garageId);
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 10;
+    const offset = (page - 1) * limit;
+
+    // Get reviews for the garage with pagination
+    const garageReviews = await db
+      .select({
+        review_id: reviews.review_id,
+        booking_id: reviews.booking_id,
+        user_id: reviews.user_id,
+        rating: reviews.rating,
+        review_text: reviews.review_text,
+        created_at: reviews.created_at
+      })
+      .from(reviews)
+      .where(eq(reviews.garage_id, garageId))
+      .orderBy(reviews.created_at)
+      .limit(limit)
+      .offset(offset);
+
+    // Get total count for pagination
+    const totalCount = await db
+      .select({ count: reviews.review_id })
+      .from(reviews)
+      .where(eq(reviews.garage_id, garageId));
+
+    // Calculate average rating
+    const avgRating = await db
+      .select({ avg: reviews.rating })
+      .from(reviews)
+      .where(eq(reviews.garage_id, garageId));
+
+    const averageRating = avgRating.length > 0 ? 
+      (garageReviews.reduce((sum, review) => sum + review.rating, 0) / garageReviews.length).toFixed(1) : 0;
+
+    res.status(200).json({
+      message: "Reviews retrieved successfully",
+      data: {
+        reviews: garageReviews,
+        pagination: {
+          page,
+          limit,
+          total: totalCount.length,
+          totalPages: Math.ceil(totalCount.length / limit)
+        },
+        summary: {
+          averageRating: parseFloat(averageRating),
+          totalReviews: totalCount.length
+        }
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Get reviews by a specific user
+exports.getUserReviews = async (req, res) => {
+  try {
+    const userId = req.user ? req.user.userId : Number(req.params.userId);
+    
+    // If accessing via params, ensure user can only access their own reviews
+    if (req.params.userId && req.user && req.user.userId !== Number(req.params.userId)) {
+      return res.status(403).json({ message: "Access denied" });
+    }
+
+    const userReviews = await db
+      .select({
+        review_id: reviews.review_id,
+        booking_id: reviews.booking_id,
+        garage_id: reviews.garage_id,
+        rating: reviews.rating,
+        review_text: reviews.review_text,
+        created_at: reviews.created_at
+      })
+      .from(reviews)
+      .where(eq(reviews.user_id, userId))
+      .orderBy(reviews.created_at);
+
+    res.status(200).json({
+      message: "User reviews retrieved successfully",
+      data: userReviews
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Get a specific review by ID
+exports.getReviewById = async (req, res) => {
+  try {
+    const reviewId = Number(req.params.reviewId);
+
+    const review = await db
+      .select()
+      .from(reviews)
+      .where(eq(reviews.review_id, reviewId));
+
+    if (review.length === 0) {
+      return res.status(404).json({ message: "Review not found" });
+    }
+
+    res.status(200).json({
+      message: "Review retrieved successfully",
+      data: review[0]
     });
   } catch (error) {
     res.status(500).json({ error: error.message });

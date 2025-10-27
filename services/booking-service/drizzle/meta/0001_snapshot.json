@@ -1,6 +1,6 @@
 {
-  "id": "d365a3fa-f8ff-441e-b2ac-2cfe65aa14d5",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "33bce945-5792-4c5e-a879-beee94c11f71",
+  "prevId": "d365a3fa-f8ff-441e-b2ac-2cfe65aa14d5",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -85,6 +85,88 @@
       "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.Reviews": {
+      "name": "Reviews",
+      "schema": "",
+      "columns": {
+        "review_id": {
+          "name": "review_id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "booking_id": {
+          "name": "booking_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "garage_id": {
+          "name": "garage_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "rating": {
+          "name": "rating",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "review_text": {
+          "name": "review_text",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "Reviews_booking_id_Bookings_booking_id_fk": {
+          "name": "Reviews_booking_id_Bookings_booking_id_fk",
+          "tableFrom": "Reviews",
+          "tableTo": "Bookings",
+          "columnsFrom": [
+            "booking_id"
+          ],
+          "columnsTo": [
+            "booking_id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "rating_check": {
+          "name": "rating_check",
+          "value": "\"Reviews\".\"rating\" >= 1 AND \"Reviews\".\"rating\" <= 5"
+        }
+      },
       "isRLSEnabled": false
     }
   },
