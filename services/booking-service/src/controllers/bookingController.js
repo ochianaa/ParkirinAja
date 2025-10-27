@@ -304,7 +304,7 @@ exports.cancelBooking = async (req, res) => {
 // Mendapatkan daftar permintaan booking untuk garasi milik owner
 exports.getOwnerRequests = async (req, res) => {
   try {
-    const ownerId = req.user?.id;
+    const ownerId = req.user?.userId;
     const authToken = req.header('Authorization')?.replace('Bearer ', '');
 
     // Get owner's garages from garage service
@@ -377,6 +377,94 @@ exports.getOwnerRequests = async (req, res) => {
   }
 };
 
+// Mendapatkan semua booking requests untuk garasi milik owner (semua status)
+exports.getAllOwnerRequests = async (req, res) => {
+  try {
+    const ownerId = req.user?.userId;
+    const authToken = req.header('Authorization')?.replace('Bearer ', '');
+
+    // Get owner's garages from garage service
+    const ownerGaragesResult = await getOwnerGarages(ownerId, authToken);
+    
+    if (!ownerGaragesResult.success) {
+      return res.status(503).json({ 
+        message: "Unable to fetch garage information",
+        error: ownerGaragesResult.error 
+      });
+    }
+
+    const ownerGarageIds = ownerGaragesResult.garages.map(garage => garage.garage_id);
+    
+    if (ownerGarageIds.length === 0) {
+      return res.status(200).json({
+        message: "No garages found for this owner",
+        data: [],
+        garage_count: 0
+      });
+    }
+
+    // Get ALL bookings for owned garages (no status filter)
+    const ownerBookings = await db
+      .select()
+      .from(bookings)
+      .where(inArray(bookings.garage_id, ownerGarageIds));
+
+    // Create a map of garage information for quick lookup
+    const garageMap = {};
+    ownerGaragesResult.garages.forEach(garage => {
+      garageMap[garage.garage_id] = garage;
+    });
+
+    // Enhance bookings with nested user and garage information
+    const enhancedBookings = await Promise.all(
+      ownerBookings.map(async (booking) => {
+        // Get user information
+        const userResult = await getUserInfo(booking.user_id, authToken);
+        const userName = userResult.success ? userResult.user.name || userResult.user.username || 'Unknown User' : 'Unknown User';
+        
+        // Get garage information from our map
+        const garage = garageMap[booking.garage_id];
+        const garageName = garage ? garage.name || garage.garage_name || 'Unknown Garage' : 'Unknown Garage';
+
+        // Remove user_id and garage_id from the booking object since they're in nested objects
+        const { user_id, garage_id, ...bookingWithoutIds } = booking;
+        
+        return {
+          ...bookingWithoutIds,
+          users: {
+            user_id: booking.user_id,
+            user_name: userName
+          },
+          garages: {
+            garage_id: booking.garage_id,
+            garage_name: garageName
+          }
+        };
+      })
+    );
+
+    // Group bookings by status for better organization
+    const bookingsByStatus = enhancedBookings.reduce((acc, booking) => {
+      const status = booking.status || 'unknown';
+      if (!acc[status]) {
+        acc[status] = [];
+      }
+      acc[status].push(booking);
+      return acc;
+    }, {});
+
+    res.status(200).json({
+      message: "Fetched all owner booking requests successfully",
+      data: enhancedBookings,
+      data_by_status: bookingsByStatus,
+      total_bookings: enhancedBookings.length,
+      garage_count: ownerGarageIds.length
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 // Mengonfirmasi permintaan booking
 exports.confirmBooking = async (req, res) => {
   try {
@@ -432,7 +520,7 @@ exports.confirmBooking = async (req, res) => {
 exports.rejectBooking = async (req, res) => {
   try {
     const bookingId = Number(req.params.bookingId);
-    const ownerId = req.user?.id;
+    const ownerId = req.user?.userId;
 
     // First, get the booking to check which garage it belongs to
     const bookingResult = await db

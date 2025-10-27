@@ -21,6 +21,8 @@ router.get('/reviews/:reviewId', bookingController.getReviewById); // Mendapatka
 // PEMILIK (OWNER)
 router.get('/owner/requests', 
     authMiddleware, roleMiddleware('owner'), bookingController.getOwnerRequests); // Mendapatkan daftar permintaan booking untuk garasi miliknya
+router.get('/owner/all-requests', 
+    authMiddleware, roleMiddleware('owner'), bookingController.getAllOwnerRequests); // Mendapatkan semua booking requests untuk garasi miliknya (semua status)
 router.post('/:bookingId/confirm', authMiddleware, roleMiddleware('owner'), bookingController.confirmBooking); // Mengonfirmasi permintaan booking
 router.post('/:bookingId/reject', authMiddleware, roleMiddleware('owner'), bookingController.rejectBooking); // Menolak permintaan booking
 router.get('/owner/reports/income', authMiddleware, roleMiddleware('owner'), bookingController.getOwnerIncome); // Mendapatkan ringkasan pendapatan
