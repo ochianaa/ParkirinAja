@@ -72,7 +72,7 @@ const RecommendedGarages = ({ garagesData, favorites, onToggleFavorite }) => {
                           <Card key={garage.garage_id} 
                             garage={garage}
                             isFavorited={favorites.includes(garage.garage_id)}
-                            onToggleFavorite={onToggleFavorite}
+                            onToggleFavorite={() => onToggleFavorite(garage.garage_id)}
                             onCardClick={() => handleOpenModal(garage)}
                             onBookNowClick={() => handleOpenBookingModal(garage)}
                           />

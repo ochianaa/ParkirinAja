@@ -24,13 +24,28 @@ const getGarageById = (garageId) => {
   return apiClient.get(`/garages/${garageId}`);
 };
 
+const getFavorites = () => {
+  return apiClient.get('/garages/favorites');
+};
+
+const addFavorite = (garageId) => {
+  return apiClient.post('/garages/favorites', { garageId });
+};
+
+const removeFavorite = (garageId) => {
+  return apiClient.delete(`/garages/favorites/${garageId}`);
+};
+
 const garageService = {
   createGarage,
   getMyGarages,
   updateGarage,
   deleteGarage,
   getAllGarages,
-  getGarageById
+  getGarageById,
+  getFavorites,
+  addFavorite,
+  removeFavorite
 };
 
 export default garageService;

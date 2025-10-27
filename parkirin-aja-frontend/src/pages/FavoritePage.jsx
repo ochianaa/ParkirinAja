@@ -1,8 +1,42 @@
-import Card from "../components/Card"
+import { useState, useEffect } from 'react';
+import Card from "../components/Card";
+import garageService from '../api/GarageService';
 
-const FavoritesPage = ({ garagesData, favorites, onToggleFavorite }) => {
+const FavoritesPage = ({ onToggleFavorite }) => {
+  const [favoritedGarages, setFavoritedGarages] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const favoritedGarages = garagesData.filter(garage => favorites.includes(garage.garage_id))
+  useEffect(() => {
+    const fetchFavorites = async () => {
+      try {
+        const response = await garageService.getFavorites();
+        setFavoritedGarages(response.data || []);
+      } catch (err) {
+        setError('Failed to fetch favorites.');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFavorites();
+  }, []);
+
+  const handleToggleFavorite = (garageId) => {
+    // Call the main toggle function from App.jsx
+    onToggleFavorite(garageId);
+    // Update the UI immediately
+    setFavoritedGarages(prevGarages => prevGarages.filter(g => g.garage_id !== garageId));
+  };
+
+  if (loading) {
+    return <div className="text-center py-24">Loading favorites...</div>;
+  }
+
+  if (error) {
+    return <div className="text-center py-24 text-red-500">{error}</div>;
+  }
 
   return (
     <section id="favorites" className="bg-slate-100 py-15 min-h-screen">
@@ -17,8 +51,8 @@ const FavoritesPage = ({ garagesData, favorites, onToggleFavorite }) => {
               <Card 
                 key={garage.garage_id}
                 garage={garage}
-                isFavorited={true}
-                onToggleFavorite={onToggleFavorite}
+                isFavorited={true} // Always true on this page
+                onToggleFavorite={() => handleToggleFavorite(garage.garage_id)}
               />
             ))}
           </div>

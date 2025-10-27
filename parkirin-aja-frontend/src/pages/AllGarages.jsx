@@ -6,7 +6,7 @@ import BookingPopUp from '../components/BookingPopUp';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
-const AllGaragesPage = () => {
+const AllGaragesPage = ({ favorites, onToggleFavorite }) => {
     const [garages, setGarages] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -84,8 +84,8 @@ const AllGaragesPage = () => {
                             <Card 
                                 key={garage.garage_id}
                                 garage={garage}
-                                isFavorited={false} // Placeholder
-                                onToggleFavorite={() => console.log('Toggle favorite')} // Placeholder
+                                isFavorited={favorites.includes(garage.garage_id)}
+                                onToggleFavorite={() => onToggleFavorite(garage.garage_id)}
                                 onCardClick={() => console.log('Card clicked', garage)} // Placeholder
                                 onBookNowClick={() => handleBookNowClick(garage)}
                             />
