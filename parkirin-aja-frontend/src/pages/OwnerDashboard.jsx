@@ -1,6 +1,31 @@
 import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import bookingService from '../api/BookingService';
 
 const OwnerDashboard = () => {
+
+    const [pendingCount, setPendingCount] = useState(0);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        const fetchBookingRequests = async () => {
+            try {
+                const response = await bookingService.getBookingRequests();
+                const pendingBookings = response.data.data.filter(booking => booking.status === 'pending');
+                setPendingCount(pendingBookings.length);
+            } catch (err) {
+                setError('Failed to load data');
+                console.error(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchBookingRequests();
+    }, []);
+
+
     return (
         <div className="min-h-screen bg-slate-100 py-15 px-35">
             <h1 className="text-3xl font-bold text-slate-800 mb-8">Dashboard</h1>
@@ -13,7 +38,13 @@ const OwnerDashboard = () => {
                 </div>
                 <div className="rounded-lg border-1 shadow-lg shadow-black/50 bg-slate-800 text-gray-300 p-6 border-gray-300">
                     <h3 className="text-sm font-medium text-gray-300">Pending Requests</h3>
-                    <p className="text-3xl font-bold mt-2">5</p>
+                    {loading ? (
+                        <p className="text-3xl font-bold mt-2">...</p>
+                    ) : error ? (
+                        <p className="text-sm font-bold mt-2 text-red-500">{error}</p>
+                    ) : (
+                        <p className="text-3xl font-bold mt-2">{pendingCount}</p>
+                    )}
                 </div>
                 <div className="rounded-lg border-1 shadow-lg shadow-black/50 bg-slate-800 text-gray-300 p-6 border-gray-300">
                     <h3 className="text-sm font-medium text-gray-300">Active Garages</h3>

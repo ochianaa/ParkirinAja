@@ -2,12 +2,23 @@ import AdminService from "../api/AdminService";
 import garageService from "../api/GarageService";
 import bookingService from "../api/BookingService";
 import { useEffect, useState } from "react";
+import {
+    ResponsiveContainer,
+    LineChart,
+    Line,
+    XAxis,
+    YAxis,
+    CartesianGrid,
+    Tooltip,
+    Legend,
+} from 'recharts';
 
 const AdminDashboard = () => {
 
     const [totalUsers, setTotalUsers] = useState(0);
     const [totalGarages, setTotalGarages] = useState(0);
     const [totalBookings, setTotalBookings] = useState(0);
+    const [chartData, setChartData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -28,6 +39,20 @@ const AdminDashboard = () => {
 
                 const bookingCount = bookingResponse.data.data.length;
                 setTotalBookings(bookingCount);
+
+                // Process data for the chart
+                const bookingsByDate = bookingResponse.data.data.reduce((acc, booking) => {
+                    const date = new Date(booking.created_at).toISOString().split('T')[0];
+                    acc[date] = (acc[date] || 0) + 1;
+                    return acc;
+                }, {});
+
+                const formattedChartData = Object.keys(bookingsByDate).map(date => ({
+                    date,
+                    bookings: bookingsByDate[date],
+                })).sort((a, b) => new Date(a.date) - new Date(b.date));
+
+                setChartData(formattedChartData);
 
             } catch (err) {
                 setError('Failed to load dashboard data.');
@@ -85,9 +110,21 @@ const AdminDashboard = () => {
 
             {/* Placeholder for charts */}
             <div className="mt-8 p-6 bg-white rounded-sm border shadow-lg">
-                <h3 className="font-bold text-lg">User Growth Chart</h3>
-                <div className="h-64 flex items-center justify-center text-gray-400">
-                    [Chart will be displayed here]
+                <h3 className="font-bold text-lg mb-4">Booking Trends</h3>
+                <div style={{ width: '100%', height: 300 }}>
+                    <ResponsiveContainer>
+                        <LineChart
+                            data={chartData}
+                            margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                        >
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey="date" />
+                            <YAxis allowDecimals={false} />
+                            <Tooltip />
+                            <Legend />
+                            <Line type="monotone" dataKey="bookings" stroke="#1e293b" strokeWidth={2} activeDot={{ r: 8 }} />
+                        </LineChart>
+                    </ResponsiveContainer>
                 </div>
             </div>
         </div>
