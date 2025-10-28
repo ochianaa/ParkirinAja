@@ -13,6 +13,7 @@ const BookingDetailPage = () => {
     const [error, setError] = useState(null);
     const [showSuccessPopup, setShowSuccessPopup] = useState(false);
     const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+    const [hasReviewed, setHasReviewed] = useState(false);
 
     useEffect(() => {
         const fetchDetails = async () => {
@@ -24,6 +25,10 @@ const BookingDetailPage = () => {
                 const garageData = garageRes.data;
 
                 setBooking({ ...bookingData, garage: garageData });
+                // Check if a review already exists and update state
+                if (bookingData.rating) {
+                    setHasReviewed(true);
+                }
 
             } catch (err) {
                 setError('Failed to load booking details.');
@@ -80,6 +85,11 @@ const BookingDetailPage = () => {
         }
     };
 
+    const handleReviewSubmitted = () => {
+        setHasReviewed(true);
+        alert('Thank you for your review!');
+    };
+
     const renderActionButtons = () => {
         if (!booking) return null;
 
@@ -112,9 +122,15 @@ const BookingDetailPage = () => {
                     </>
                 );
             case 'completed':
+            case 'confirmed':
                 return (
-                    <button type="button" onClick={() => setIsReviewModalOpen(true)} className="w-full px-6 py-3 bg-slate-800 text-white rounded-lg font-semibold hover:bg-slate-700">
-                        Write a Review
+                    <button 
+                        type="button" 
+                        onClick={() => setIsReviewModalOpen(true)} 
+                        className="w-full px-6 py-3 bg-slate-800 text-white rounded-lg font-semibold hover:bg-slate-700 disabled:opacity-50"
+                        disabled={hasReviewed}
+                    >
+                        {hasReviewed ? 'Review Submitted' : 'Write a Review'}
                     </button>
                 );
             case 'cancelled':
@@ -195,6 +211,8 @@ const BookingDetailPage = () => {
             <ReviewPopUp 
                 isOpen={isReviewModalOpen}
                 onClose={() => setIsReviewModalOpen(false)}
+                bookingId={id}
+                onReviewSubmitted={handleReviewSubmitted}
             />
         </div>
     );

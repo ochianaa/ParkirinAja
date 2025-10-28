@@ -52,6 +52,10 @@ const getOwnerBookingRequests = () => {
   return apiClient.get('/bookings/owner/all-requests');
 };
 
+const addReview = (bookingId, reviewData) => {
+  return apiClient.post(`/bookings/${bookingId}/review`, reviewData);
+};
+
 const bookingService = {
   createBooking,
   getMyBookings,
@@ -65,7 +69,8 @@ const bookingService = {
   getOwnerTransactions,
   getOwnerIncome,
   getAdminAnalytics,
-  getOwnerBookingRequests
+  getOwnerBookingRequests,
+  addReview
 };
 
 export default bookingService;
