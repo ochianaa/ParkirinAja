@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import bookingService from '../api/BookingService';
 import garageService from '../api/GarageService';
 import SuccessPopUp from '../components/SuccessPopUp';
+import ReviewPopUp from '../components/ReviewPopUp';
 
 const BookingDetailPage = () => {
     const { id } = useParams();
@@ -11,6 +12,7 @@ const BookingDetailPage = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+    const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
 
     useEffect(() => {
         const fetchDetails = async () => {
@@ -111,7 +113,7 @@ const BookingDetailPage = () => {
                 );
             case 'completed':
                 return (
-                    <button type="button" className="w-full px-6 py-3 bg-slate-800 text-white rounded-lg font-semibold hover:bg-slate-700">
+                    <button type="button" onClick={() => setIsReviewModalOpen(true)} className="w-full px-6 py-3 bg-slate-800 text-white rounded-lg font-semibold hover:bg-slate-700">
                         Write a Review
                     </button>
                 );
@@ -189,6 +191,11 @@ const BookingDetailPage = () => {
                     </div>
                 </div>
             </div>
+
+            <ReviewPopUp 
+                isOpen={isReviewModalOpen}
+                onClose={() => setIsReviewModalOpen(false)}
+            />
         </div>
     );
 };
