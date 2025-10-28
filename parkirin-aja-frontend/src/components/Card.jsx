@@ -1,7 +1,28 @@
-import { FaHeart, FaRegHeart, FaMapMarkerAlt, FaStar } from 'react-icons/fa'
+import { FaHeart, FaRegHeart, FaMapMarkerAlt, FaStar } from 'react-icons/fa';
+import { useState, useEffect } from 'react';
 
 const Card = ({ garage, isFavorited, onToggleFavorite, onCardClick, onBookNowClick }) => {
-    const { garage_id, name, image, address, price_per_hour, status, rating } = garage;
+    const { garage_id, name, image, address, price_per_hour, status } = garage;
+    const [ratingSummary, setRatingSummary] = useState({ averageRating: 0, totalReviews: 0 });
+
+    useEffect(() => {
+        const fetchReviews = async () => {
+            if (!garage_id) return;
+            try {
+                const response = await fetch(`http://localhost:8080/api/bookings/reviews/garage/${garage_id}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.data && data.data.summary) {
+                        setRatingSummary(data.data.summary);
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to fetch reviews', error);
+            }
+        };
+
+        fetchReviews();
+    }, [garage_id]);
 
     const getStatusColor = (status) => {
         switch (status) {
@@ -51,8 +72,9 @@ const Card = ({ garage, isFavorited, onToggleFavorite, onCardClick, onBookNowCli
                     </div>
 
                     <div className="flex items-center gap-1 text-sm">
-                        <span className="font-bold text-gray-800">{rating ? rating.toFixed(1) : 'N/A'}</span>
+                        <span className="font-bold text-gray-800">{ratingSummary.averageRating > 0 ? Number(ratingSummary.averageRating).toFixed(1) : 'N/A'}</span>
                         <FaStar className="text-yellow-400" />
+                        {ratingSummary.totalReviews > 0 && <span className="text-gray-500 text-xs ml-1">({ratingSummary.totalReviews})</span>}
                     </div>
                 </div>
                 
