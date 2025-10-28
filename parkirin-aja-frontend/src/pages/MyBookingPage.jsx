@@ -12,6 +12,7 @@ const getStatusInfo = (status) => {
             return { icon: <FaCheckCircle />, color: 'text-green-500', text: 'Confirmed' };
         case 'pending':
             return { icon: <FaHourglassHalf />, color: 'text-yellow-500', text: 'Pending' };
+        case 'rejected':
         case 'cancelled':
             return { icon: <FaTimesCircle />, color: 'text-red-500', text: 'Cancelled' };
         default:

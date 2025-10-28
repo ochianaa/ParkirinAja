@@ -1,55 +1,36 @@
 import { useState, useEffect } from 'react';
 import bookingService from '../api/BookingService';
-import garageService from '../api/GarageService';
-import AdminService from '../api/AdminService';
 
 const BookingRequestsPage = () => {
-    const [requests, setRequests] = useState([]);
     const [detailedRequests, setDetailedRequests] = useState([]);
     const [loading, setLoading] = useState(true);
     const [processingId, setProcessingId] = useState(null);
 
     useEffect(() => {
         const fetchRequests = async () => {
+            setLoading(true);
             try {
-                const response = await bookingService.getBookingRequests();
-                const pendingRequests = response.data.data.filter(req => req.status === 'pending');
-                setRequests(pendingRequests);
+                const response = await bookingService.getOwnerBookingRequests();
+                const allRequests = response.data.data;
+                const completedRequests = allRequests.filter(req => req.status === 'completed');
+
+                const detailed = completedRequests.map(request => ({
+                    ...request,
+                    renterName: request.users.user_name,
+                    garageName: request.garages.garage_name,
+                    dateRange: `${new Date(request.start_time).toLocaleDateString()} - ${new Date(request.end_time).toLocaleDateString()}`
+                }));
+
+                setDetailedRequests(detailed);
             } catch (error) {
                 console.error('Error fetching booking requests:', error);
+            } finally {
+                setLoading(false);
             }
         };
 
         fetchRequests();
     }, []);
-
-    useEffect(() => {
-        const fetchDetailedRequests = async () => {
-            if (requests.length > 0) {
-                setLoading(true);
-                const detailedPromises = requests.map(async (request) => {
-                    let garageName = 'Unknown Garage';
-                    try {
-                        const garageResponse = await garageService.getGarageById(request.garage_id);
-                        garageName = garageResponse.data.name;
-                    } catch (error) {
-                        console.error(`Failed to fetch garage details for booking ${request.booking_id}`, error);
-                    }
-                    return {
-                        ...request,
-                        renterName: `Renter ID: ${request.user_id}`,
-                        garageName: garageName,
-                        dateRange: `${new Date(request.start_time).toLocaleDateString()} - ${new Date(request.end_time).toLocaleDateString()}`
-                    };
-                });
-                const detailed = await Promise.all(detailedPromises);
-                setDetailedRequests(detailed);
-            }
-            setLoading(false);
-        };
-
-        fetchDetailedRequests();
-    }, [requests]);
 
     const handleConfirm = async (id) => {
         setProcessingId(id);
@@ -133,7 +114,7 @@ const BookingRequestsPage = () => {
                     </div>
                 ) : (
                     <div className="text-center py-20 bg-white rounded-lg shadow-md">
-                        <p className="text-lg text-gray-500">No pending booking requests.</p>
+                        <p className="text-lg text-gray-500">No booking requests.</p>
                     </div>
                 )}
             </div>
