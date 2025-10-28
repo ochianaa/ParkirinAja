@@ -5,6 +5,7 @@ import Card from '../components/Card';
 import BookingPopUp from '../components/BookingPopUp';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import GarageDetail from '../components/GarasiDetail';
 
 const AllGaragesPage = ({ favorites, onToggleFavorite }) => {
     const [garages, setGarages] = useState([]);
@@ -15,6 +16,9 @@ const AllGaragesPage = ({ favorites, onToggleFavorite }) => {
 
     const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
     const [bookingGarage, setBookingGarage] = useState(null);
+
+    const [isModalOpen, setIsModalOpen] = useState(false)
+    const [selectedGarage, setSelectedGarage] = useState(null)
 
     useEffect(() => {
         const fetchGarages = async () => {
@@ -66,6 +70,16 @@ const AllGaragesPage = ({ favorites, onToggleFavorite }) => {
         return <div className="text-center py-24 text-red-500">{error}</div>;
     }
 
+    const handleOpenModal = (garage) => {
+        setSelectedGarage(garage)
+        setIsModalOpen(true)
+    };
+
+    const handleCloseModal = () => {
+        setIsModalOpen(false)
+        setSelectedGarage(null)
+    };
+
     return (
         <>
             <div className="bg-slate-100 min-h-screen">
@@ -86,13 +100,20 @@ const AllGaragesPage = ({ favorites, onToggleFavorite }) => {
                                 garage={garage}
                                 isFavorited={favorites.includes(garage.garage_id)}
                                 onToggleFavorite={() => onToggleFavorite(garage.garage_id)}
-                                onCardClick={() => console.log('Card clicked', garage)} // Placeholder
+                                onCardClick={() => handleOpenModal(garage)}
                                 onBookNowClick={() => handleBookNowClick(garage)}
                             />
                         ))}
                     </div>
                 </div>
             </div>
+
+            <GarageDetail
+                garage={selectedGarage}
+                onClose={handleCloseModal}
+                isFavorited={selectedGarage && favorites.includes(selectedGarage.garage_id)}
+                onToggleFavorite={onToggleFavorite}
+            />
 
             <BookingPopUp 
                 isOpen={isBookingModalOpen}

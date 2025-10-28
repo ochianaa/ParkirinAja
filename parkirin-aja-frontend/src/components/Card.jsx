@@ -1,7 +1,7 @@
-import { FaHeart, FaRegHeart, FaMapMarkerAlt } from 'react-icons/fa'
+import { FaHeart, FaRegHeart, FaMapMarkerAlt, FaStar } from 'react-icons/fa'
 
 const Card = ({ garage, isFavorited, onToggleFavorite, onCardClick, onBookNowClick }) => {
-    const { garage_id, name, image, address, price_per_hour, status } = garage;
+    const { garage_id, name, image, address, price_per_hour, status, rating } = garage;
 
     const getStatusColor = (status) => {
         switch (status) {
@@ -42,9 +42,18 @@ const Card = ({ garage, isFavorited, onToggleFavorite, onCardClick, onBookNowCli
             </div>
 
             <div className="p-4">
-                <div onClick={onCardClick} className="mb-2 cursor-pointer flex flex-col items-center">
-                    <h3 className="text-lg font-bold text-gray-800">{name}</h3>
-                    <p className="text-sm text-gray-500 flex items-center mb-3"> <FaMapMarkerAlt className="mr-2 text-gray-400" /> {address}</p>
+                <div onClick={onCardClick} className="mb-2 cursor-pointer flex justify-between text-left">
+                    <div>
+                        <h3 className="text-lg font-bold text-gray-800">{name}</h3>
+                        <p className="text-sm text-gray-500 flex items-center">
+                            <FaMapMarkerAlt className="mr-2 text-gray-400" /> {address}
+                        </p>
+                    </div>
+
+                    <div className="flex items-center gap-1 text-sm">
+                        <span className="font-bold text-gray-800">{rating ? rating.toFixed(1) : 'N/A'}</span>
+                        <FaStar className="text-yellow-400" />
+                    </div>
                 </div>
                 
                 <div className="flex justify-between items-center mt-4">
