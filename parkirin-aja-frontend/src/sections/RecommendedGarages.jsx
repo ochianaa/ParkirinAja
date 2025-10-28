@@ -5,6 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import { useState } from "react";
 import GarageDetail from "../components/GarasiDetail";
 import BookingPopUp from "../components/BookingPopUp";
+import DisplayReviewsPopUp from "../components/DisplayReviewsPopUp";
 
 
 const RecommendedGarages = ({ garagesData, favorites, onToggleFavorite }) => {
@@ -17,6 +18,30 @@ const RecommendedGarages = ({ garagesData, favorites, onToggleFavorite }) => {
     
     const { user } = useAuth();
     const navigate = useNavigate();
+
+    const [isReviewPopupOpen, setReviewPopupOpen] = useState(false);
+    const [popupReviews, setPopupReviews] = useState([]);
+    const [popupGarageName, setPopupGarageName] = useState('');
+
+    const handleRatingClick = async (garage) => {
+        try {
+            const response = await fetch(`http://localhost:8080/api/bookings/reviews/garage/${garage.garage_id}`);
+            if (response.ok) {
+                const data = await response.json();
+                setPopupReviews(data.data.reviews || []);
+                setPopupGarageName(garage.name);
+                setReviewPopupOpen(true);
+            }
+        } catch (error) {
+            console.error('Failed to fetch reviews for popup', error);
+        }
+    };
+
+    const handleCloseReviewPopup = () => {
+        setReviewPopupOpen(false);
+        setPopupReviews([]);
+        setPopupGarageName('');
+    };
 
     // 3. Modifikasi fungsi ini untuk menambahkan validasi
     const handleOpenBookingModal = (garage) => {
@@ -75,6 +100,7 @@ const RecommendedGarages = ({ garagesData, favorites, onToggleFavorite }) => {
                             onToggleFavorite={() => onToggleFavorite(garage.garage_id)}
                             onCardClick={() => handleOpenModal(garage)}
                             onBookNowClick={() => handleOpenBookingModal(garage)}
+                            onRatingClick={() => handleRatingClick(garage)}
                           />
                       ))}
                   </div>
@@ -100,6 +126,13 @@ const RecommendedGarages = ({ garagesData, favorites, onToggleFavorite }) => {
               garage={bookingGarage}
               onSubmit={handleConfirmBooking}
           />
+
+            <DisplayReviewsPopUp 
+                isOpen={isReviewPopupOpen}
+                reviews={popupReviews} 
+                onClose={handleCloseReviewPopup} 
+                garageName={popupGarageName} 
+            />
       </>
     )
 }

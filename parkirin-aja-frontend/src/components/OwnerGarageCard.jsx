@@ -1,13 +1,13 @@
 import { FaEdit, FaTrash, FaStar } from 'react-icons/fa';
 import { useState, useEffect } from 'react';
 
-const OwnerGarageCard = ({ garage, onEdit, onDelete }) => {
+const OwnerGarageCard = ({ garage, onEdit, onDelete, onRatingClick }) => {
 
     const { garage_id, image, name, status, address, price_per_hour } = garage;
     const [ratingSummary, setRatingSummary] = useState({ averageRating: 0, totalReviews: 0 });
 
     useEffect(() => {
-        const fetchReviews = async () => {
+        const fetchReviewSummary = async () => {
             if (!garage_id) return;
             try {
                 const response = await fetch(`http://localhost:8080/api/bookings/reviews/garage/${garage_id}`);
@@ -21,8 +21,7 @@ const OwnerGarageCard = ({ garage, onEdit, onDelete }) => {
                 console.error('Failed to fetch reviews', error);
             }
         };
-
-        fetchReviews();
+        fetchReviewSummary();
     }, [garage_id]);
 
     const statusColor = status === 'available' ? 'text-green-600' : 'text-red-600';
@@ -42,7 +41,7 @@ const OwnerGarageCard = ({ garage, onEdit, onDelete }) => {
                         <p className="text-sm text-gray-700">{address}</p>
                     </div>
 
-                    <div className="flex items-center gap-1 text-sm pt-1">
+                    <div className="flex items-center gap-1 text-sm pt-1 cursor-pointer" onClick={(e) => { e.stopPropagation(); onRatingClick(); }}>
                         <span className="font-bold text-gray-800">{ratingSummary.averageRating > 0 ? Number(ratingSummary.averageRating).toFixed(1) : 'N/A'}</span>
                         <FaStar className="text-yellow-400" />
                         {ratingSummary.totalReviews > 0 && <span className="text-gray-500 text-xs ml-1">({ratingSummary.totalReviews})</span>}
