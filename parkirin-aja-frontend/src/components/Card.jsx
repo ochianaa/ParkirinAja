@@ -2,7 +2,7 @@ import { FaHeart, FaRegHeart, FaMapMarkerAlt, FaStar } from 'react-icons/fa';
 import { useState, useEffect } from 'react';
 
 const Card = ({ garage, isFavorited, onToggleFavorite, onCardClick, onBookNowClick, onRatingClick }) => {
-    const { garage_id, name, image, address, price_per_hour, status } = garage;
+    const { garage_id, name, image_url, address, price_per_hour, status } = garage;
     const [ratingSummary, setRatingSummary] = useState({ averageRating: 0, totalReviews: 0 });
 
     useEffect(() => {
@@ -44,7 +44,7 @@ const Card = ({ garage, isFavorited, onToggleFavorite, onCardClick, onBookNowCli
         <div className="bg-white rounded-xl shadow-lg overflow-hidden w-full max-w-90 hover:scale-105 transition-transform duration-300">
             <div className="relative">
                 <div onClick={onCardClick} className="cursor-pointer">
-                    <img className="w-full h-40 object-cover" src={image} alt={name} />
+                    <img className="w-full h-40 object-cover" src={image_url} alt={name} />
                 </div>
                 <div className={`absolute top-3 left-3 text-white text-xs font-bold px-2 py-1 rounded ${getStatusColor(status)}`}>
                 {status}

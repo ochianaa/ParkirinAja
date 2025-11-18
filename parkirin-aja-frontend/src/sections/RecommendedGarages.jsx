@@ -43,22 +43,18 @@ const RecommendedGarages = ({ garagesData, favorites, onToggleFavorite }) => {
         setPopupGarageName('');
     };
 
-    // 3. Modifikasi fungsi ini untuk menambahkan validasi
     const handleOpenBookingModal = (garage) => {
-        // Skenario 1: Pengguna belum login
         if (!user) {
             alert('You must be logged in to book a garage.');
-            navigate('/login'); // Arahkan ke halaman login
-            return; // Hentikan fungsi di sini
+            navigate('/login');
+            return;
         }
 
-        // Skenario 2: Pengguna sudah login, tapi bukan 'renter'
         if (user.role !== 'renter') {
             alert('Only renters can book a garage. Please log in with a renter account.');
-            return; // Hentikan fungsi di sini
+            return;
         }
         
-        // Skenario 3: Pengguna sudah login dan rolenya 'renter' (sukses)
         setBookingGarage(garage);
         setIsBookingModalOpen(true);
     };
