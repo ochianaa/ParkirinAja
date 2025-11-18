@@ -63,7 +63,8 @@ const GarageManagementPage = () => {
                             <th className="p-4 font-semibold text-sm">Garage Name</th>
                             <th className="p-4 font-semibold text-sm">Owner</th>
                             <th className="p-4 font-semibold text-sm">Status</th>
-                            <th className="p-4 font-semibold text-sm">Actions</th>
+                            <th className="p-4 font-semibold text-sm text-center">Actions</th>
+                            <th className="p-4 font-semibold text-sm">Delete</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y">
@@ -82,7 +83,7 @@ const GarageManagementPage = () => {
                                         {garage.status}
                                     </span>
                                 </td>
-                                <td className="p-4 flex gap-2">
+                                <td className="py-4 flex gap-2">
                                     <button onClick={() => handleUpdateStatus(garage.garage_id, 'approved')} className="text-sm font-semibold text-green-600 hover:underline disabled:text-gray-400" disabled={garage.status === 'approved'}>Approve</button>
                                     <button onClick={() => handleUpdateStatus(garage.garage_id, 'rejected')} className="text-sm font-semibold text-red-600 hover:underline disabled:text-gray-400" disabled={garage.status === 'rejected'}>Reject</button>
                                     <button onClick={() => handleUpdateStatus(garage.garage_id, 'featured')} className="text-sm font-semibold text-purple-600 hover:underline disabled:text-gray-400" disabled={garage.status === 'featured'}>Feature</button>
