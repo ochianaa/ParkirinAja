@@ -71,7 +71,7 @@ function App() {
 
   useEffect(() => {
     const fetchFavorites = async () => {
-      if (user) {
+      if (user && user.role === 'renter') {
         try {
           const response = await garageService.getFavorites();
           setFavorites(response.data.map(fav => fav.garage_id));

@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 
 const OwnerGarageCard = ({ garage, onEdit, onDelete, onRatingClick }) => {
 
-    const { garage_id, image, name, status, address, price_per_hour } = garage;
+    const { garage_id, image_url, name, status, address, price_per_hour } = garage;
     const [ratingSummary, setRatingSummary] = useState({ averageRating: 0, totalReviews: 0 });
 
     useEffect(() => {
@@ -30,7 +30,7 @@ const OwnerGarageCard = ({ garage, onEdit, onDelete, onRatingClick }) => {
         <div className="bg-white rounded-xl shadow-lg overflow-hidden w-full max-w-90 hover:scale-105 transition-transform duration-300">
             <div className="relative">
                 <div className="cursor-pointer">
-                    <img className="w-full h-40 object-cover" src={image} alt={name} />
+                    <img className="w-full h-40 object-cover" src={image_url} alt={name} />
                 </div>
             </div>
 
