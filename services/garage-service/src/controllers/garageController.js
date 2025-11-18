@@ -48,7 +48,8 @@ const createGarage = async (req, res) => {
       address: req.body.address,
       description: req.body.description,
       price_per_hour: req.body.pricePerHour,
-      status: req.body.status || 'available'
+      status: req.body.status || 'available',
+      image_url: req.body.image_url || null,
     };
     
     const newGarage = await Garage.create(garageData);
@@ -88,6 +89,7 @@ const updateGarage = async (req, res) => {
     if (req.body.description !== undefined) updateData.description = req.body.description;
     if (req.body.pricePerHour !== undefined) updateData.price_per_hour = req.body.pricePerHour;
     if (req.body.status !== undefined) updateData.status = req.body.status;
+    if (req.body.image_url !== undefined) updateData.image_url = req.body.image_url;
     
     const updated = await Garage.update(idNum, updateData);
     res.json(updated);
