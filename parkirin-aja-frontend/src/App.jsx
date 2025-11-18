@@ -85,17 +85,17 @@ function App() {
 
         {/* === Rute Khusus Owner === */}
         <Route element={<ProtectedRoute allowedRoles={['owner']} />}>
-          <Route path="/owner/dashboard" />
-          <Route path="/owner/my-garages" />
-          <Route path="/owner/requests" />
-          <Route path="/owner/reports" />
+          <Route path="/owner/dashboard" element={<OwnerDashboard />} />
+          <Route path="/owner/my-garages" element={<MyGaragesOwnerPage />} />
+          <Route path="/owner/requests" element={<BookingRequestsPage />} />
+          <Route path="/owner/reports" element={<ReportsPage />} />
         </Route>
 
         {/* === Rute Khusus Admin === */}
         <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
-          <Route path="/admin/dashboard" />
-          <Route path="/admin/users" />
-          <Route path="/admin/garages" />
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/users" element={<UserManagementPage />} />
+          <Route path="/admin/garages" element={<GarageManagementPage />} />
         </Route>
 
       </Routes>
