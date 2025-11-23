@@ -29,20 +29,17 @@ const AdminDashboard = () => {
                 const [userResponse, garageResponse, allBookingsResponse, analyticsResponse] = await Promise.all([
                     AdminService.getAllUsers(),
                     garageService.getAllGarages(),
-                    bookingService.getAllBookingsForAdmin(), // Still needed for the chart
-                    bookingService.getAdminAnalytics() // For summary cards
+                    bookingService.getAllBookingsForAdmin(),
+                    bookingService.getAdminAnalytics()
                 ]);
 
-                // Set user and garage counts
                 setTotalUsers(userResponse.data.data.users.length);
                 setTotalGarages(garageResponse.data.length);
 
-                // Set summary data from analytics endpoint
                 const summary = analyticsResponse.data.summary;
                 setTotalBookings(summary.totalBookings);
                 setTotalRevenue(summary.totalRevenue);
 
-                // Process all bookings data for the chart
                 const bookingsByDate = allBookingsResponse.data.data.reduce((acc, booking) => {
                     const date = new Date(booking.created_at).toISOString().split('T')[0];
                     acc[date] = (acc[date] || 0) + 1;

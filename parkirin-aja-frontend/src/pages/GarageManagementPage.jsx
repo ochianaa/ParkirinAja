@@ -64,7 +64,6 @@ const GarageManagementPage = () => {
                             <th className="p-4 font-semibold text-sm">Owner</th>
                             <th className="p-4 font-semibold text-sm">Status</th>
                             <th className="p-4 font-semibold text-sm text-center">Actions</th>
-                            <th className="p-4 font-semibold text-sm">Delete</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y">
