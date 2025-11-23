@@ -167,7 +167,7 @@ const BookingDetailPage = () => {
                         <FaArrowLeft /> Back to My Bookings
                     </Link>
                     <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-                        <img src={booking.garage.image} alt={booking.garage.name} className="w-full h-64 object-cover" />
+                        <img src={booking.garage.image_url} alt={booking.garage.name} className="w-full h-64 object-cover" />
                         <div className="p-8">
                             <div className="border-b pb-4 mb-6">
                                 <h2 className="text-3xl font-bold text-slate-800">{booking.garage.name}</h2>
