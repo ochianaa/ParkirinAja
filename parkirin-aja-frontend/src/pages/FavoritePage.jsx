@@ -5,6 +5,7 @@ import bookingService from '../api/BookingService';
 import BookingPopUp from '../components/BookingPopUp';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import DisplayReviewsPopUp from '../components/DisplayReviewsPopUp';
 
 const FavoritesPage = ({ onToggleFavorite }) => {
   const [favoritedGarages, setFavoritedGarages] = useState([]);
@@ -15,6 +16,10 @@ const FavoritesPage = ({ onToggleFavorite }) => {
 
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const [bookingGarage, setBookingGarage] = useState(null);
+
+  const [isReviewPopupOpen, setReviewPopupOpen] = useState(false);
+  const [popupReviews, setPopupReviews] = useState([]);
+  const [popupGarageName, setPopupGarageName] = useState('');
 
   useEffect(() => {
     const fetchFavorites = async () => {
@@ -65,6 +70,26 @@ const FavoritesPage = ({ onToggleFavorite }) => {
       }
   };
 
+  const handleRatingClick = async (garage) => {
+    try {
+        const response = await fetch(`http://localhost:8080/api/bookings/reviews/garage/${garage.garage_id}`);
+        if (response.ok) {
+            const data = await response.json();
+            setPopupReviews(data.data.reviews || []);
+            setPopupGarageName(garage.name);
+            setReviewPopupOpen(true);
+        }
+    } catch (error) {
+        console.error('Failed to fetch reviews for popup', error);
+    }
+  };
+
+  const handleCloseReviewPopup = () => {
+      setReviewPopupOpen(false);
+      setPopupReviews([]);
+      setPopupGarageName('');
+  };
+
   if (loading) {
     return <div className="text-center py-24">Loading favorites...</div>;
   }
@@ -90,6 +115,7 @@ const FavoritesPage = ({ onToggleFavorite }) => {
                   isFavorited={true} // Always true on this page
                   onToggleFavorite={() => handleToggleFavorite(garage.garage_id)}
                   onBookNowClick={() => handleBookNowClick(garage)}
+                  onRatingClick={() => handleRatingClick(garage)}
                 />
               ))}
             </div>
@@ -102,6 +128,13 @@ const FavoritesPage = ({ onToggleFavorite }) => {
           onClose={() => setIsBookingModalOpen(false)}
           garage={bookingGarage}
           onSubmit={handleConfirmBooking}
+      />
+
+      <DisplayReviewsPopUp 
+          isOpen={isReviewPopupOpen}
+          reviews={popupReviews} 
+          onClose={handleCloseReviewPopup} 
+          garageName={popupGarageName} 
       />
     </>
   )
