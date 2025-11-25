@@ -61,7 +61,27 @@ Pastikan perangkat Anda telah terinstal:
     cd ParkirinAja
     ```
 
-2.  **Jalankan Aplikasi**
+2.  **Siapkan Environment (.env)**
+    Gunakan referensi `./.env.example` untuk membuat file `.env`:
+    ```bash
+    cp .env.example .env
+    ```
+    Lalu sesuaikan nilai minimal berikut:
+    ```env
+    POSTGRES_USER=postgres
+    POSTGRES_PASSWORD=postgres
+    POSTGRES_DB=parkirinaja_db
+    POSTGRES_PORT=5432
+    PORT=8080
+    JWT_SECRET="your-super-secret-jwt-key-here"
+
+    AUTH_SERVICE_URL=http://auth-service:3001
+    GARAGE_SERVICE_URL=http://garage-service:3002
+    BOOKING_SERVICE_URL=http://booking-service:3003
+    ```
+    Opsional: tambahkan `JWT_EXPIRES_IN` (mis. `24h`) bila diperlukan oleh Auth Service.
+
+3.  **Jalankan Aplikasi**
     Gunakan Docker Compose untuk membangun dan menjalankan service:
     ```bash
     docker compose up
@@ -71,10 +91,13 @@ Pastikan perangkat Anda telah terinstal:
     docker compose up -d
     ```
 
-3.  **Akses Aplikasi**
-    Setelah proses selesai, aplikasi dapat diakses melalui browser sesuai port yang dikonfigurasi di `docker-compose.yml` (biasanya `http://localhost:80` atau `http://localhost:3000`).
+4.  **Akses Aplikasi**
+    Setelah proses selesai, akses layanan sesuai konfigurasi `docker-compose.yml`:
+    - API Gateway to all service: `http://localhost:8080`
+    - Frontend: `http://localhost:3000` (lihat catatan port di compose)
 
-4.  **Menghentikan Aplikasi**
+
+5.  **Menghentikan Aplikasi**
     Untuk mematikan container:
     ```bash
     docker compose down
