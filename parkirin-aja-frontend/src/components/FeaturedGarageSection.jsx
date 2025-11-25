@@ -30,10 +30,10 @@ const FeaturedGarageSection = () => {
     }
 
     return (
-        <section className="bg-slate-100 rounded-3xl py-7">
+        <section className="bg-slate-100 rounded-2xl py-7">
             <div className="container mx-auto px-6">
                 <h2 className="text-3xl font-bold text-slate-800 text-center mb-5">Featured Garages</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
                     {featuredGarages.map((garage) => (
                         <FeaturedGarageCard key={garage.garage_id} garage={garage} />
                     ))}
