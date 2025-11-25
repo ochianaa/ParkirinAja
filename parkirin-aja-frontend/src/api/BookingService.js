@@ -12,10 +12,65 @@ const getMyBookingById = (bookingId) => {
   return apiClient.get(`/bookings/renter/my-bookings/${bookingId}`);
 };
 
+const getBookingRequests = () => {
+  return apiClient.get('/bookings/owner/requests');
+};
+
+const confirmBooking = (bookingId) => {
+  return apiClient.post(`/bookings/${bookingId}/confirm`);
+};
+
+const rejectBooking = (bookingId) => {
+  return apiClient.post(`/bookings/${bookingId}/reject`);
+};
+
+const cancelBooking = (bookingId) => {
+  return apiClient.post(`/bookings/${bookingId}/cancel`);
+};
+
+const getAllBookingsForAdmin = () => {
+  return apiClient.get('/bookings/admin/bookings');
+};
+
+const startPayment = (bookingId) => {
+  return apiClient.post(`/bookings/${bookingId}/payment`);
+};
+
+const getOwnerTransactions = () => {
+  return apiClient.get('/bookings/owner/reports/transactions');
+};
+
+const getOwnerIncome = () => {
+  return apiClient.get('/bookings/owner/reports/income');
+};
+
+const getAdminAnalytics = () => {
+  return apiClient.get('/bookings/admin/analytics');
+};
+
+const getOwnerBookingRequests = () => {
+  return apiClient.get('/bookings/owner/all-requests');
+};
+
+const addReview = (bookingId, reviewData) => {
+  return apiClient.post(`/bookings/${bookingId}/review`, reviewData);
+};
+
 const bookingService = {
   createBooking,
   getMyBookings,
-  getMyBookingById
+  getMyBookingById,
+  getBookingRequests,
+  confirmBooking,
+  rejectBooking,
+  cancelBooking,
+  getAllBookingsForAdmin,
+  startPayment,
+  getOwnerTransactions,
+  getOwnerIncome,
+  getAdminAnalytics,
+  getOwnerBookingRequests,
+  addReview
 };
 
 export default bookingService;

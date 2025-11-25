@@ -4,6 +4,7 @@ import AddGarageOwner from '../components/AddGarageOwner';
 import EditGarageOwner from '../components/EditGarageOwner';
 import OwnerGarageCard from '../components/OwnerGarageCard';
 import garageService from '../api/GarageService';
+import DisplayReviewsPopUp from '../components/DisplayReviewsPopUp';
 
 const MyGaragesPage = () => {
 
@@ -11,6 +12,10 @@ const MyGaragesPage = () => {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [editingGarage, setEditingGarage] = useState(null);
     const [garages, setGarages] = useState([]);
+
+    const [isReviewPopupOpen, setReviewPopupOpen] = useState(false);
+    const [popupReviews, setPopupReviews] = useState([]);
+    const [popupGarageName, setPopupGarageName] = useState('');
 
     const fetchGarages = async () => {
         try {
@@ -24,6 +29,26 @@ const MyGaragesPage = () => {
     useEffect(() => {
         fetchGarages();
     }, []);
+
+    const handleRatingClick = async (garage) => {
+        try {
+            const response = await fetch(`http://localhost:8080/api/bookings/reviews/garage/${garage.garage_id}`);
+            if (response.ok) {
+                const data = await response.json();
+                setPopupReviews(data.data.reviews || []);
+                setPopupGarageName(garage.name);
+                setReviewPopupOpen(true);
+            }
+        } catch (error) {
+            console.error('Failed to fetch reviews for popup', error);
+        }
+    };
+
+    const handleCloseReviewPopup = () => {
+        setReviewPopupOpen(false);
+        setPopupReviews([]);
+        setPopupGarageName('');
+    };
 
     const handleGarageAdded = () => {
         fetchGarages();
@@ -71,6 +96,7 @@ const MyGaragesPage = () => {
                                 garage={garage}
                                 onEdit={() => handleEdit(garage)}
                                 onDelete={() => handleDelete(garage.garage_id)}
+                                onRatingClick={() => handleRatingClick(garage)}
                             />
                         ))}
                     </div>
@@ -91,7 +117,14 @@ const MyGaragesPage = () => {
                     onGarageUpdated={handleGarageUpdated}
                 />
             )}
-        </>        
+
+            <DisplayReviewsPopUp 
+                isOpen={isReviewPopupOpen}
+                reviews={popupReviews} 
+                onClose={handleCloseReviewPopup} 
+                garageName={popupGarageName} 
+            />
+        </>
     );
 };
 

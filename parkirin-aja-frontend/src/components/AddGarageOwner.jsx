@@ -4,12 +4,13 @@ import garageService from '../api/GarageService';
 
 const AddGarageOwner = ({ isOpen, onClose, onGarageAdded }) => {
     
-    // State untuk form, tanpa 'ImgURL'
+    // State untuk form, dengan 'image_url'
     const [formData, setFormData] = useState({
         name: '',
         address: '',
         description: '',
         pricePerHour: '',
+        image_url: '', // Tambahkan image_url
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -29,8 +30,6 @@ const AddGarageOwner = ({ isOpen, onClose, onGarageAdded }) => {
         const payload = {
             ...formData,
             pricePerHour: Number(formData.pricePerHour),
-            // Anda bisa mengirim URL placeholder default jika backend membutuhkannya
-            // ImgURL: 'https://via.placeholder.com/300x200?text=Garage+Image',
         };
 
         try {
@@ -61,14 +60,24 @@ const AddGarageOwner = ({ isOpen, onClose, onGarageAdded }) => {
                 <form onSubmit={handleSubmit}>
                     <div className="flex flex-col md:flex-row gap-8">
 
-                        {/* --- Kolom Kiri (Placeholder Gambar) --- */}
+                        {/* --- Kolom Kiri (Input Gambar) --- */}
                         <div className="w-full md:w-1/3">
-                            <label className="block text-sm text-left font-medium text-gray-700">Garage Photo</label>
-                            <div className="mt-1 flex justify-center items-center p-2 border-2 border-gray-300 border-dashed rounded-md w-full aspect-video bg-gray-50">
-                                <div className="text-center text-gray-400">
-                                    <FaImage className="mx-auto h-12 w-12" />
-                                    <p className="mt-2 text-sm">Image will be handled by default</p>
-                                </div>
+                            <label htmlFor="image_url" className="block text-sm text-left font-medium text-gray-700">Garage Photo URL</label>
+                            <input type="text" id="image_url" name="image_url" placeholder='https://example.com/image.png'
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-3" 
+                                value={formData.image_url}
+                                onChange={handleChange}
+                            />
+                            {/* Preview Gambar */}
+                            <div className="mt-2 w-full aspect-video bg-gray-50 rounded-md flex justify-center items-center border border-gray-200">
+                                {formData.image_url ? (
+                                    <img src={formData.image_url} alt="Garage Preview" className="w-full h-full object-cover rounded-md" />
+                                ) : (
+                                    <div className="text-center text-gray-400">
+                                        <FaImage className="mx-auto h-12 w-12" />
+                                        <p className="mt-2 text-sm">Image preview</p>
+                                    </div>
+                                )}
                             </div>
                         </div>
 
@@ -76,7 +85,6 @@ const AddGarageOwner = ({ isOpen, onClose, onGarageAdded }) => {
                         <div className="w-full md:w-2/3 flex flex-col space-y-6">
                             <div>
                                 <label htmlFor="name" className="block text-sm text-left font-medium text-gray-700">Garage Name</label>
-                                {/* 5. Pastikan 'name' di sini cocok dengan state */}
                                 <input type="text" id="name" name="name" placeholder='Garage name'
                                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-3" 
                                     value={formData.name}

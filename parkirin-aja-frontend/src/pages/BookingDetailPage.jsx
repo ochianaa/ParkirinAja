@@ -1,14 +1,19 @@
-import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
 import { FaArrowLeft } from 'react-icons/fa';
+import { useParams, Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import bookingService from '../api/BookingService';
 import garageService from '../api/GarageService';
+import SuccessPopUp from '../components/SuccessPopUp';
+import ReviewPopUp from '../components/ReviewPopUp';
 
 const BookingDetailPage = () => {
     const { id } = useParams();
     const [booking, setBooking] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+    const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+    const [hasReviewed, setHasReviewed] = useState(false);
 
     useEffect(() => {
         const fetchDetails = async () => {
@@ -20,6 +25,10 @@ const BookingDetailPage = () => {
                 const garageData = garageRes.data;
 
                 setBooking({ ...bookingData, garage: garageData });
+                // Check if a review already exists and update state
+                if (bookingData.rating) {
+                    setHasReviewed(true);
+                }
 
             } catch (err) {
                 setError('Failed to load booking details.');
@@ -32,6 +41,55 @@ const BookingDetailPage = () => {
         fetchDetails();
     }, [id]);
 
+    const [isCancelling, setIsCancelling] = useState(false);
+    const [cancelError, setCancelError] = useState(null);
+    const [isPaying, setIsPaying] = useState(false);
+    const [paymentError, setPaymentError] = useState(null);
+
+    const handleCancelBooking = async () => {
+        if (!window.confirm('Are you sure you want to cancel this booking?')) {
+            return;
+        }
+
+        setIsCancelling(true);
+        setCancelError(null);
+        try {
+            await bookingService.cancelBooking(id);
+            setBooking(prevBooking => ({ ...prevBooking, status: 'cancelled' }));
+            alert('Booking cancelled successfully.');
+        } catch (err) {
+            const message = err.response?.data?.message || 'Failed to cancel booking.';
+            setCancelError(message);
+            alert(message);
+            console.error(err);
+        } finally {
+            setIsCancelling(false);
+        }
+    };
+
+    const handlePayment = async () => {
+        setIsPaying(true);
+        setPaymentError(null);
+        try {
+            const response = await bookingService.startPayment(id);
+            const updatedBookingData = response.data.data;
+            setBooking(prevBooking => ({ ...prevBooking, ...updatedBookingData }));
+            setShowSuccessPopup(true); // Show custom popup
+        } catch (err) {
+            const message = err.response?.data?.message || 'Failed to process payment.';
+            setPaymentError(message);
+            alert(message);
+            console.error(err);
+        } finally {
+            setIsPaying(false);
+        }
+    };
+
+    const handleReviewSubmitted = () => {
+        setHasReviewed(true);
+        alert('Thank you for your review!');
+    };
+
     const renderActionButtons = () => {
         if (!booking) return null;
 
@@ -39,18 +97,40 @@ const BookingDetailPage = () => {
             case 'pending':
                 return (
                     <>
-                        <button type="button" className="px-6 py-3 bg-red-100 text-red-700 rounded-lg font-semibold hover:bg-red-200">
-                            Cancel Booking
-                        </button>
-                        <button type="submit" className="px-6 py-3 bg-slate-800 text-white rounded-lg font-semibold border hover:bg-transparent hover:text-gray-600">
-                            Proceed to Payment
-                        </button>
+                        <div className="flex flex-col items-end">
+                            <div className="flex gap-4">
+                                <button 
+                                    type="button" 
+                                    className="px-6 py-3 bg-red-100 text-red-700 rounded-lg font-semibold hover:bg-red-200 disabled:opacity-50"
+                                    onClick={handleCancelBooking}
+                                    disabled={isCancelling || isPaying}
+                                >
+                                    {isCancelling ? 'Cancelling...' : 'Cancel Booking'}
+                                </button>
+                                <button 
+                                    type="button" 
+                                    className="px-6 py-3 bg-slate-800 text-white rounded-lg font-semibold border hover:bg-transparent hover:text-gray-600 disabled:opacity-50"
+                                    onClick={handlePayment}
+                                    disabled={isPaying || isCancelling}
+                                >
+                                    {isPaying ? 'Processing...' : 'Proceed to Payment'}
+                                </button>
+                            </div>
+                            {cancelError && <p className="text-red-500 text-sm mt-2">{cancelError}</p>}
+                            {paymentError && <p className="text-red-500 text-sm mt-2">{paymentError}</p>}
+                        </div>
                     </>
                 );
             case 'completed':
+            case 'confirmed':
                 return (
-                    <button type="button" className="w-full px-6 py-3 bg-slate-800 text-white rounded-lg font-semibold hover:bg-slate-700">
-                        Write a Review
+                    <button 
+                        type="button" 
+                        onClick={() => setIsReviewModalOpen(true)} 
+                        className="w-full px-6 py-3 bg-slate-800 text-white rounded-lg font-semibold hover:bg-slate-700 disabled:opacity-50"
+                        disabled={hasReviewed}
+                    >
+                        {hasReviewed ? 'Review Submitted' : 'Write a Review'}
                     </button>
                 );
             case 'cancelled':
@@ -74,13 +154,20 @@ const BookingDetailPage = () => {
 
     return (
         <div className="min-h-screen bg-slate-100 py-12">
+            <SuccessPopUp 
+                isOpen={showSuccessPopup}
+                onClose={() => setShowSuccessPopup(false)}
+                title="Payment Successful!"
+                message="Your booking has been confirmed and paid."
+                buttonText="OK"
+            />
             <div className="container mx-auto px-6">
                 <div className="w-full max-w-4xl mx-auto">
                     <Link to="/mybookings" className="flex items-center gap-2 text-slate-600 font-semibold mb-4 hover:text-slate-800">
                         <FaArrowLeft /> Back to My Bookings
                     </Link>
                     <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-                        <img src={booking.garage.image} alt={booking.garage.name} className="w-full h-64 object-cover" />
+                        <img src={booking.garage.image_url} alt={booking.garage.name} className="w-full h-64 object-cover" />
                         <div className="p-8">
                             <div className="border-b pb-4 mb-6">
                                 <h2 className="text-3xl font-bold text-slate-800">{booking.garage.name}</h2>
@@ -120,6 +207,13 @@ const BookingDetailPage = () => {
                     </div>
                 </div>
             </div>
+
+            <ReviewPopUp 
+                isOpen={isReviewModalOpen}
+                onClose={() => setIsReviewModalOpen(false)}
+                bookingId={id}
+                onReviewSubmitted={handleReviewSubmitted}
+            />
         </div>
     );
 };

@@ -5,8 +5,10 @@ import Card from '../components/Card';
 import BookingPopUp from '../components/BookingPopUp';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import GarageDetail from '../components/GarasiDetail';
+import DisplayReviewsPopUp from '../components/DisplayReviewsPopUp';
 
-const AllGaragesPage = () => {
+const AllGaragesPage = ({ favorites, onToggleFavorite }) => {
     const [garages, setGarages] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -15,6 +17,13 @@ const AllGaragesPage = () => {
 
     const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
     const [bookingGarage, setBookingGarage] = useState(null);
+
+    const [isModalOpen, setIsModalOpen] = useState(false)
+    const [selectedGarage, setSelectedGarage] = useState(null)
+
+    const [isReviewPopupOpen, setReviewPopupOpen] = useState(false);
+    const [popupReviews, setPopupReviews] = useState([]);
+    const [popupGarageName, setPopupGarageName] = useState('');
 
     useEffect(() => {
         const fetchGarages = async () => {
@@ -31,6 +40,26 @@ const AllGaragesPage = () => {
 
         fetchGarages();
     }, []);
+
+    const handleRatingClick = async (garage) => {
+        try {
+            const response = await fetch(`http://localhost:8080/api/bookings/reviews/garage/${garage.garage_id}`);
+            if (response.ok) {
+                const data = await response.json();
+                setPopupReviews(data.data.reviews || []);
+                setPopupGarageName(garage.name);
+                setReviewPopupOpen(true);
+            }
+        } catch (error) {
+            console.error('Failed to fetch reviews for popup', error);
+        }
+    };
+
+    const handleCloseReviewPopup = () => {
+        setReviewPopupOpen(false);
+        setPopupReviews([]);
+        setPopupGarageName('');
+    };
 
     const handleBookNowClick = (garage) => {
         if (!user) {
@@ -66,6 +95,16 @@ const AllGaragesPage = () => {
         return <div className="text-center py-24 text-red-500">{error}</div>;
     }
 
+    const handleOpenModal = (garage) => {
+        setSelectedGarage(garage)
+        setIsModalOpen(true)
+    };
+
+    const handleCloseModal = () => {
+        setIsModalOpen(false)
+        setSelectedGarage(null)
+    };
+
     return (
         <>
             <div className="bg-slate-100 min-h-screen">
@@ -84,21 +123,36 @@ const AllGaragesPage = () => {
                             <Card 
                                 key={garage.garage_id}
                                 garage={garage}
-                                isFavorited={false} // Placeholder
-                                onToggleFavorite={() => console.log('Toggle favorite')} // Placeholder
-                                onCardClick={() => console.log('Card clicked', garage)} // Placeholder
+                                isFavorited={favorites.includes(garage.garage_id)}
+                                onToggleFavorite={() => onToggleFavorite(garage.garage_id)}
+                                onCardClick={() => handleOpenModal(garage)}
                                 onBookNowClick={() => handleBookNowClick(garage)}
+                                onRatingClick={() => handleRatingClick(garage)}
                             />
                         ))}
                     </div>
                 </div>
             </div>
 
+            <GarageDetail
+                garage={selectedGarage}
+                onClose={handleCloseModal}
+                isFavorited={selectedGarage && favorites.includes(selectedGarage.garage_id)}
+                onToggleFavorite={onToggleFavorite}
+            />
+
             <BookingPopUp 
                 isOpen={isBookingModalOpen}
                 onClose={() => setIsBookingModalOpen(false)}
                 garage={bookingGarage}
                 onSubmit={handleConfirmBooking}
+            />
+
+            <DisplayReviewsPopUp 
+                isOpen={isReviewPopupOpen}
+                reviews={popupReviews} 
+                onClose={handleCloseReviewPopup} 
+                garageName={popupGarageName} 
             />
         </>
     );

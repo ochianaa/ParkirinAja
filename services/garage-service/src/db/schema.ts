@@ -7,6 +7,7 @@ export const garages = pgTable('garages', {
   name: varchar('name', { length: 255 }).notNull(),
   address: text('address').notNull(),
   description: text('description'),
+  image_url: varchar('image_url', { length: 2048 }),
   price_per_hour: decimal('price_per_hour', { precision: 10, scale: 2 }).notNull(),
   status: varchar('status', { length: 50 }).notNull().default('available'),
   created_at: timestamp('created_at').defaultNow(),

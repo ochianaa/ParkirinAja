@@ -5,6 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import { useState } from "react";
 import GarageDetail from "../components/GarasiDetail";
 import BookingPopUp from "../components/BookingPopUp";
+import DisplayReviewsPopUp from "../components/DisplayReviewsPopUp";
 
 
 const RecommendedGarages = ({ garagesData, favorites, onToggleFavorite }) => {
@@ -18,22 +19,42 @@ const RecommendedGarages = ({ garagesData, favorites, onToggleFavorite }) => {
     const { user } = useAuth();
     const navigate = useNavigate();
 
-    // 3. Modifikasi fungsi ini untuk menambahkan validasi
+    const [isReviewPopupOpen, setReviewPopupOpen] = useState(false);
+    const [popupReviews, setPopupReviews] = useState([]);
+    const [popupGarageName, setPopupGarageName] = useState('');
+
+    const handleRatingClick = async (garage) => {
+        try {
+            const response = await fetch(`http://localhost:8080/api/bookings/reviews/garage/${garage.garage_id}`);
+            if (response.ok) {
+                const data = await response.json();
+                setPopupReviews(data.data.reviews || []);
+                setPopupGarageName(garage.name);
+                setReviewPopupOpen(true);
+            }
+        } catch (error) {
+            console.error('Failed to fetch reviews for popup', error);
+        }
+    };
+
+    const handleCloseReviewPopup = () => {
+        setReviewPopupOpen(false);
+        setPopupReviews([]);
+        setPopupGarageName('');
+    };
+
     const handleOpenBookingModal = (garage) => {
-        // Skenario 1: Pengguna belum login
         if (!user) {
             alert('You must be logged in to book a garage.');
-            navigate('/login'); // Arahkan ke halaman login
-            return; // Hentikan fungsi di sini
+            navigate('/login');
+            return;
         }
 
-        // Skenario 2: Pengguna sudah login, tapi bukan 'renter'
         if (user.role !== 'renter') {
             alert('Only renters can book a garage. Please log in with a renter account.');
-            return; // Hentikan fungsi di sini
+            return;
         }
         
-        // Skenario 3: Pengguna sudah login dan rolenya 'renter' (sukses)
         setBookingGarage(garage);
         setIsBookingModalOpen(true);
     };
@@ -72,9 +93,10 @@ const RecommendedGarages = ({ garagesData, favorites, onToggleFavorite }) => {
                           <Card key={garage.garage_id} 
                             garage={garage}
                             isFavorited={favorites.includes(garage.garage_id)}
-                            onToggleFavorite={onToggleFavorite}
+                            onToggleFavorite={() => onToggleFavorite(garage.garage_id)}
                             onCardClick={() => handleOpenModal(garage)}
                             onBookNowClick={() => handleOpenBookingModal(garage)}
+                            onRatingClick={() => handleRatingClick(garage)}
                           />
                       ))}
                   </div>
@@ -100,6 +122,13 @@ const RecommendedGarages = ({ garagesData, favorites, onToggleFavorite }) => {
               garage={bookingGarage}
               onSubmit={handleConfirmBooking}
           />
+
+            <DisplayReviewsPopUp 
+                isOpen={isReviewPopupOpen}
+                reviews={popupReviews} 
+                onClose={handleCloseReviewPopup} 
+                garageName={popupGarageName} 
+            />
       </>
     )
 }

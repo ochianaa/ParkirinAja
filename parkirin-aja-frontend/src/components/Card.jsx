@@ -1,7 +1,27 @@
-import { FaHeart, FaRegHeart } from 'react-icons/fa'
+import { FaHeart, FaRegHeart, FaMapMarkerAlt, FaStar } from 'react-icons/fa';
+import { useState, useEffect } from 'react';
 
-const Card = ({ garage, isFavorited, onToggleFavorite, onCardClick, onBookNowClick }) => {
-    const { garage_id, name, image, address, price_per_hour, status } = garage;
+const Card = ({ garage, isFavorited, onToggleFavorite, onCardClick, onBookNowClick, onRatingClick }) => {
+    const { garage_id, name, image_url, address, price_per_hour, status } = garage;
+    const [ratingSummary, setRatingSummary] = useState({ averageRating: 0, totalReviews: 0 });
+
+    useEffect(() => {
+        const fetchReviewSummary = async () => {
+            if (!garage_id) return;
+            try {
+                const response = await fetch(`http://localhost:8080/api/bookings/reviews/garage/${garage_id}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.data && data.data.summary) {
+                        setRatingSummary(data.data.summary);
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to fetch reviews', error);
+            }
+        };
+        fetchReviewSummary();
+    }, [garage_id]);
 
     const getStatusColor = (status) => {
         switch (status) {
@@ -24,7 +44,7 @@ const Card = ({ garage, isFavorited, onToggleFavorite, onCardClick, onBookNowCli
         <div className="bg-white rounded-xl shadow-lg overflow-hidden w-full max-w-90 hover:scale-105 transition-transform duration-300">
             <div className="relative">
                 <div onClick={onCardClick} className="cursor-pointer">
-                    <img className="w-full h-40 object-cover" src={image} alt={name} />
+                    <img className="w-full h-40 object-cover" src={image_url} alt={name} />
                 </div>
                 <div className={`absolute top-3 left-3 text-white text-xs font-bold px-2 py-1 rounded ${getStatusColor(status)}`}>
                 {status}
@@ -42,9 +62,19 @@ const Card = ({ garage, isFavorited, onToggleFavorite, onCardClick, onBookNowCli
             </div>
 
             <div className="p-4">
-                <div onClick={onCardClick} className="mb-2 cursor-pointer">
-                    <h3 className="text-lg font-bold text-gray-800">{name}</h3>
-                    <p className="text-sm text-gray-500">{address}</p>
+                <div onClick={onCardClick} className="mb-2 cursor-pointer flex justify-between text-left">
+                    <div>
+                        <h3 className="text-lg font-bold text-gray-800">{name}</h3>
+                        <p className="text-sm text-gray-500 flex items-center">
+                            <FaMapMarkerAlt className="mr-2 text-gray-400" /> {address}
+                        </p>
+                    </div>
+
+                    <div className="flex items-center gap-1 text-sm cursor-pointer" onClick={(e) => { e.stopPropagation(); onRatingClick(); }}>
+                        <span className="font-bold text-gray-800">{ratingSummary.averageRating > 0 ? Number(ratingSummary.averageRating).toFixed(1) : 'N/A'}</span>
+                        <FaStar className="text-yellow-400" />
+                        {ratingSummary.totalReviews > 0 && <span className="text-gray-500 text-xs ml-1">({ratingSummary.totalReviews})</span>}
+                    </div>
                 </div>
                 
                 <div className="flex justify-between items-center mt-4">
