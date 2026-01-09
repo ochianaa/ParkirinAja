@@ -11,11 +11,11 @@ CREATE TABLE "garages" (
 	"name" varchar(255) NOT NULL,
 	"address" text NOT NULL,
 	"description" text,
+	"image_url" varchar(2048),
 	"price_per_hour" numeric(10, 2) NOT NULL,
 	"status" varchar(50) DEFAULT 'available' NOT NULL,
 	"created_at" timestamp DEFAULT now(),
 	"updated_at" timestamp DEFAULT now()
 );
 --> statement-breakpoint
-DROP TABLE "Garages" CASCADE;--> statement-breakpoint
 CREATE UNIQUE INDEX "favorites_user_garage_unique" ON "favorites" USING btree ("user_id","garage_id");

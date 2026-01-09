@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: parkirinaja-config
+data:
+  POSTGRES_USER: postgres
+  POSTGRES_DB: parkirinaja_db
+  POSTGRES_PORT: "5432"
+  AUTH_SERVICE_URL: http://auth-service:3001
+  GARAGE_SERVICE_URL: http://garage-service:3002
+  BOOKING_SERVICE_URL: http://booking-service:3003
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: parkirinaja-secret
+type: Opaque
+stringData:
+  POSTGRES_PASSWORD: change-me
+  JWT_SECRET: change-me
+
