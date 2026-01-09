@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: garage-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: garage-service
+  template:
+    metadata:
+      labels:
+        app: garage-service
+    spec:
+      containers:
+        - name: garage-service
+          image: garage-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3002
+          envFrom:
+            - configMapRef:
+                name: parkirinaja-config
+            - secretRef:
+                name: parkirinaja-secret
+          env:
+            - name: PORT
+              value: "3002"
+            - name: DATABASE_URL
+              value: postgresql://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@postgres-db:5432/$(POSTGRES_DB)
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: garage-service
+spec:
+  selector:
+    app: garage-service
+  ports:
+    - name: http
+      port: 3002
+      targetPort: 3002
+  type: ClusterIP
